@@ -1,10 +1,10 @@
 # Run H2O on docker
 
 ```bash
-curl -O http://h2o-release.s3.amazonaws.com/h2o/rel-zipf/4/h2o-3.32.1.4.zip
-unzip h2o-3.32.1.4.zip
+curl -O http://h2o-release.s3.amazonaws.com/h2o/rel-zizler/4/h2o-3.34.0.4.zip
+unzip h2o-3.34.0.4.zip
 docker run --rm -it \
-  -v $(pwd)/h2o-3.32.1.4:/app/h2o \
+  -v $(pwd)/h2o-3.34.0.4:/app/h2o \
   -v notebook:/root/h2oflows/notebook \
   -p 54321:54321 \
   --name h2o-server \

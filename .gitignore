@@ -132,6 +132,7 @@ dmypy.json
 auto-gluon-models
 
 # h2o
-h2o/h2o-3.32.1.4/
+h2o/h2o-*/
 tmp
 *.zip
+*.csv
