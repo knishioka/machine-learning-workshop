@@ -47,3 +47,19 @@ H2O_API_Extensions:         Amazon S3, Algos, AutoML, Core V3, TargetEncoder, Co
 Python_version:             3.9.7 final
 --------------------------  ---------------------------------------------------------
 ```
+
+
+# H2O Wave
+## Install Wave
+
+```bash
+wget https://github.com/h2oai/wave/releases/download/v0.19.0/wave-0.19.0-darwin-amd64.tar.gz
+tar xzvf wave-0.19.0-darwin-amd64.tar.gz
+mv wave-0.19.0-darwin-amd64 wave
+```
+
+## Run Wave Server
+```bash
+cd wave
+./waved
+```
