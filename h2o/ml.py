@@ -17,7 +17,7 @@ async def serve(q: Q):
 
 def header(q):
     q.page["title"] = ui.header_card(
-        box="1 1 11 1",
+        box="1 1 9 1",
         title="AIアプリケーション",
         subtitle="AIアプリを作る",
         icon_color="#ffe600",
