@@ -1,5 +1,5 @@
 # 機械学習の社会実装勉強会第6回(https://machine-learning-workshop.connpass.com/event/233814/)のスクリプト
-from h2o_wave import site, ui
+from h2o_wave import main, site, ui
 
 page = site["/hello"]
 
