@@ -137,3 +137,5 @@ tmp
 *.zip
 *.csv
 *.tar.gz
+wave
+.DS_Store
