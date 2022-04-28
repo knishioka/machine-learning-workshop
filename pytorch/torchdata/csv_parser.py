@@ -1,8 +1,4 @@
-from typing import Iterator, Union, Tuple
-
 import torchdata.datapipes as dp
-from torchdata.datapipes import functional_datapipe
-from torchdata.datapipes.iter import IterDataPipe
 
 FOLDER = "data"
 datapipe = dp.iter.FileLister([FOLDER]).filter(
