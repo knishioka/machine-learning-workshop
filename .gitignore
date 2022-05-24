@@ -139,3 +139,4 @@ tmp
 *.tar.gz
 wave
 .DS_Store
+*.dat
