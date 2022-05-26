@@ -1,5 +1,6 @@
 import io
 import os
+import json
 
 import tweepy
 
@@ -23,4 +24,4 @@ def get_tweets(keyword, n_tweets):
 if __name__ == "__main__":
     tweets = get_tweets(keyword="S&P500 lang:en", n_tweets=1000)
     with io.open("tweets.dat", "w") as f:
-        f.write("\n".join(map(str, tweets)))
+        f.write("\n".join(map(json.dumps, tweets)))
