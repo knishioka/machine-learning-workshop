@@ -1,7 +1,9 @@
 [機械学習の社会実装勉強会第14回](https://machine-learning-workshop.connpass.com/event/257236/)で使用したスクリプトです。
 
-```bash
-```
+
+
+## SageMaker Studioでdocker imageをbuild
+### 実行ロールにCodeBuild用の権限追加
 
 実行ロールのTrust Relationshipsに以下を追加
 
@@ -113,4 +115,11 @@
         }
     ]
 }
+```
+
+### sagemaker-studio-image-build
+
+```python
+!pip install sagemaker-studio-image-build
+!sm-docker build .
 ```
