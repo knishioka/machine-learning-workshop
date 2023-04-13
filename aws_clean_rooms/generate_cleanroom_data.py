@@ -45,7 +45,7 @@ for i in range(100):
 with open("ads_impressions.csv", mode="w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(
-        ["email", "campaign_id", "num_impression", "num_clicks", "impression_date"]
+        ["email", "campaign_id", "num_impressions", "num_clicks", "impression_date"]
     )
     for d in ads_impressions:
         writer.writerow(d)
