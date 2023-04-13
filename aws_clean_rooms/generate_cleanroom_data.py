@@ -9,7 +9,7 @@ from faker import Faker
 # users.csvの生成
 fake = Faker("ja_JP")
 data = []
-for i in range(10):
+for i in range(30):
     name = fake.name()
     email = fake.email()
     age_group = random.randint(2, 5) * 10
@@ -28,7 +28,7 @@ users = [d[1] for d in data]
 # ads_impressions.csvの生成
 ads_impressions = []
 impression_date_dict = defaultdict(set)  # 各emailアドレスに対して、既出の日付を記録する辞書
-for i in range(100):
+for i in range(1000):
     email = random.choice(users)
     campaign_id = random.randint(1, 10)
     num_impressions = random.randint(2, 100)
