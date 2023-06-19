@@ -57,3 +57,10 @@ with open("campaigns.csv", mode="w", newline="") as f:
     writer.writerow(["campaign_id", "campaign_name"])
     for c in campaigns:
         writer.writerow(c)
+
+# provider_users.csvの作成
+with open("provider_users.csv", mode="w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["email", "annual_income"])
+    for user in users:
+        writer.writerow([user, random.randint(4, 9) * 100])
