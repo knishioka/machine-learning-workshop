@@ -4,8 +4,27 @@ theme: default
 paginate: true
 ---
 
-# LangChainの永続性: なぜ必要で、どう実現するか
+# LangGraphを用いたAIアプリケーションにおける<br>メモリ永続化の実践
+### 2024/08/31 機械学習の社会実装勉強会 第38回
 
+---
+## 今回のお話
+AIアプリケーション開発の新たな可能性を開くLangGraphのCheckpointer機能について、実際の動作をデモンストレーションを通じて紹介
+
+---
+
+## 自己紹介
+
+- 名前: 西岡 賢一郎
+   - Twitter: @ken_nishi
+   - note: https://note.com/kenichiro
+   - YouTube: [【経営xデータサイエンスx開発】西岡 賢一郎のチャンネル](https://www.youtube.com/channel/UCpiskjqLv1AJg64jFCQIyBg)
+- 経歴
+   - 東京大学で位置予測アルゴリズムを研究し博士 (学術) を取得
+   - 東京大学博士課程在学中にデータサイエンスのサービスを提供する株式会社トライディアを設立
+   - トライディアを売却し、CTOとして3年半務め、2021年10月末にCTOを退職
+   - CDPのスタートアップ (Sr. CSM)・株式会社データインフォームド (CEO)・株式会社ディースタッツ (CTO)
+   - プロダクト開発チーム・データサイエンスチームの立ち上げ
 ---
 
 ## LangChainとは
@@ -18,13 +37,22 @@ paginate: true
 
 ## LangGraphとは
 
+<style>
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+</style>
+
 - LangChainの一部として開発されたライブラリ
 - 状態を持つマルチアクターアプリケーションを構築するためのツール
 - エージェントやマルチエージェントのワークフローを作成可能
+![width:300px center](images/langgraph_workflow.png)
+
 
 ---
 
-## なぜ永続性（Persistence）が必要か？
+## なぜ永続性が必要か？
 
 1. **文脈の維持**
    - 複数の対話にわたって会話の文脈を保持
@@ -39,16 +67,16 @@ paginate: true
 
 ---
 
-## 永続性の実現方法：状態保存機能
+## 永続性の実現方法：Checkpointer
 
-LangGraphでは、「状態保存機能」を通じて永続性を実現します。
+- LangGraphでは、「Checkpointer」を通じて永続性を実現
 
-**状態保存機能とは：**
-アプリケーションの状態を定期的に保存し、必要に応じて復元する機能
+- **Checkpionterとは：**
+   - アプリケーションの状態を保存し、必要に応じて復元する機能
 
 ---
 
-## 状態保存機能の主な特徴
+## Checkpointerの主な特徴
 
 1. **セッションメモリ**
    - ユーザーとのやり取りの履歴を保存
@@ -64,60 +92,47 @@ LangGraphでは、「状態保存機能」を通じて永続性を実現しま�
 
 ---
 
-## 状態保存機能の実装
+## Checkpointerの実装
 
-LangGraph v0.2で導入された新しいライブラリ：
+[LangGraph v0.2](https://blog.langchain.dev/langgraph-v0-2/)で導入された新しいライブラリ：
 
 - `langgraph_checkpoint`: 基本インターフェース
-- `langgraph_checkpoint_sqlite`: 開発・テスト用
-- `langgraph_checkpoint_postgres`: 本番環境用
+- `langgraph_checkpoint_sqlite`: SQLiteに保存 (開発・テスト用)
+- `langgraph_checkpoint_postgres`: PostgreSQLに保存 (本番環境用)
 
 ---
 
-## 状態保存機能の使用例
+## LangGraph v0.2 の変更
+- 変数名変更
+   - `thread_ts` → `checkpoint_id`
+   - `parent_ts` → `parent_checkpoint_id`
+- import方法の変更
+   - 旧: `from langgraph.checkpoint import BaseCheckpointSaver`
+   - 新: `from langgraph.checkpoint.base import BaseCheckpointSaver`
+- SQLiteチェックポインターが分離: `langgraph-checkpoint-sqlite`
+
+---
+
+## Checkpointerの使用例
 
 ```python
 from langgraph.graph import StateGraph
-from langgraph.checkpoint.aiosqlite import AsyncSqliteSaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 # グラフの構築
-builder = StateGraph(...)
+builder = StateGraph(State)
 
-# 状態保存機能の初期化
-memory = AsyncSqliteSaver.from_conn_string(":memory:")
-
-# グラフのコンパイルと状態保存機能の適用
-graph = builder.compile(checkpointer=memory)
+# graphをcompileするときにcheckpointerを指定
+with SqliteSaver.from_conn_string(":memory:") as memory:
+    graph = builder.compile(checkpointer=memory)
 ```
 ---
-## 状態保存機能の仕組み
-
-<div class="mermaid">
-sequenceDiagram
-    participant App as LangGraphアプリ
-    participant CP as Checkpointer
-    participant DB as データベース
-
-    App->>CP: 状態更新
-    CP->>DB: シリアライズされた状態を保存
-
-    Note over App,DB: 後で状態を復元する場合
-
-    App->>CP: 状態復元要求
-    CP->>DB: 保存された状態を取得
-    DB-->>CP: シリアライズされた状態
-    CP-->>App: 復元された状態
-</div>
-
-<script type="module">
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.0.0/dist/mermaid.esm.min.mjs';
-mermaid.initialize({ startOnLoad: true });
-window.addEventListener('vscode.markdown.updateContent', function() { mermaid.init() });
-</script>
+## Checkpointerの仕組み
+![width:700px center](images/langgraph_persistence.png)
 
 ---
 
-## 状態保存機能がもたらす利点
+## Checkpointerの利点
 
 1. **一貫性のある長期的な対話**
    - ユーザーとの会話履歴を保持し、文脈に応じた応答が可能
@@ -143,13 +158,20 @@ window.addEventListener('vscode.markdown.updateContent', function() { mermaid.in
    - 履歴の動的な操作に一部制限あり
 
 3. 実装の選択
-   - 使用環境に適した状態保存機能の選択が重要
+   - 使用環境に適したCheckpointer機能の選択が重要
 
 ---
+## デモンストレーション
+- LangGraphのCheckpointer使用の実演
+   - MemorySaver
+   - SqliteSaver
+   - PostgresSaver
+- ソースコード: https://github.com/knishioka/machine-learning-workshop/blob/main/langchain/langchain_persistence.ipynb
 
+---
 ## まとめ
 
-- LangGraphの状態保存機能は、永続性を実現する強力なツール
+- LangGraphのCheckpointerは、永続性を実現する強力なツール
 - 長期的な対話、エラー回復、複雑なワークフローを可能に
 - 適切に使用することで、より洗練されたAIアプリケーションの開発が可能
 
