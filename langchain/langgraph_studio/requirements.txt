@@ -1,0 +1,7 @@
+langgraph
+langchain_anthropic
+tavily-python
+langchain_community
+langchain_openai
+langchain_experimental
+matplotlib
