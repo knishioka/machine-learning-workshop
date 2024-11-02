@@ -14,14 +14,14 @@ img[alt~="center"] {
 </style>
 
 ---
-# LangGraph Studio Template
+# LangGraph Template
 
 ---
 ## LangGraph Template
 
 - LangGraph Templateは、PythonとJavaScriptで利用可能なテンプレートレポジトリ
 - 実体はGitHub上のリポジトリ: (langgraph:///template?githubUrl=https%3A%2F%2Fgithub.com%2Flangchain-ai%2Freact-agent)
-![width:400px center](images/langgraph_studio_template.png)
+![width:400px center](images/langgraph_template.png)
 
 
 
