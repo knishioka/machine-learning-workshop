@@ -25,7 +25,6 @@ style: |
     height: var(--area-height);
     line-height: var(--area-height);
     font-size: calc(var(--area-height) * 0.7);
-    border: 1px dashed gray; /* debug */
   }
 
   section.title h1 {
@@ -90,7 +89,7 @@ ul {
   - 東京大学で位置予測アルゴリズムを研究し博士 (学術) を取得
   - 東京大学の博士課程在学中にデータサイエンスをもとにしたサービスを提供する株式会社トライディアを設立
   - トライディアを別のIT会社に売却し、CTOとして3年半務め、2021年10月末にCTOを退職
-  - CDPのスタートアップ (Sr. PdM)・株式会社データインフォームド (CEO)・株式会社ディースタッツ (CTO)
+  - 株式会社データインフォームド (CEO)・株式会社ディースタッツ (CTO)・CDPのスタートアップ (Sr. CSM)
   - 自社および他社のプロダクト開発チーム・データサイエンスチームの立ち上げ経験
 
 ---
