@@ -99,19 +99,21 @@ def fine_tune_with_mlx(data_path: str, output_path: str, iterations: int = 100):
     """MLXを使用したfine-tuning"""
     print_status("MLXでのfine-tuning開始", "info")
     
-    # MLXコマンドの構築
+    # MLXコマンドの構築（正しいオプション）
     cmd = f"""
 python -m mlx_lm.lora \\
     --model mlx-community/Llama-3.2-1B-4bit \\
+    --train \\
     --data {data_path} \\
     --adapter-path {output_path} \\
     --iters {iterations} \\
     --batch-size 1 \\
-    --lora-rank 8 \\
     --learning-rate 1e-4
 """
     
     print(f"\n実行コマンド:\n{cmd}")
+    print_status("注: MLXのインストールが必要です。エラーが出た場合は以下を実行してください:", "warning")
+    print("pip install mlx mlx-lm")
     
     # 実際の実行はサブプロセスで
     import subprocess
@@ -121,6 +123,7 @@ python -m mlx_lm.lora \\
         print_status("Fine-tuning完了！", "success")
     else:
         print_status(f"エラー: {result.stderr}", "error")
+        print_status("代替案: PyTorchを使用したfine-tuningを試してください (--method pytorch)", "info")
         return False
     
     return True
