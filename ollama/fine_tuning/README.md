@@ -359,20 +359,184 @@ python fine_tune.py --data sales.jsonl --model-name sales-assistant
 - [Modelfile仕様](https://github.com/ollama/ollama/blob/main/docs/modelfile.md)
 - [サポートされているモデル一覧](https://ollama.ai/library)
 
-## 💡 次のステップ
+## 🚀 真のFine-tuningへのステップアップ
 
-1. **より大きなデータセットの準備**
-   - 実際の顧客対応ログからデータを抽出
-   - ChatGPTやClaudeを使ってデータを生成
+Ollamaのプロンプトエンジニアリングで限界を感じた場合は、以下のステップで真のfine-tuningに進むことができます：
 
-2. **評価メトリクスの実装**
-   - 応答の品質評価
-   - ユーザーフィードバックの収集
+### 完全なワークフロー
 
-3. **プロダクション環境への展開**
+#### 1. **環境準備とデータ作成**
+
+```bash
+# ローカルでデータ準備
+cd ollama/fine_tuning
+python true_fine_tuning_demo.py
+
+# 生成されるファイル:
+# - tech_support_data.json (訓練データ)
+# - Modelfile.tech-support-finetuned (Ollama用設定)
+```
+
+#### 2. **GPU環境でのFine-tuning実行（Google Colab推奨）**
+
+```python
+# Google Colabで実行
+!pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+!pip install --no-deps trl peft accelerate bitsandbytes
+
+# データをアップロード後、fine-tuning実行
+from unsloth import FastLanguageModel
+# ... (true_fine_tuning_demo.pyのコードを実行)
+
+# 出力: tech_support_model-unsloth.Q4_K_M.gguf
+```
+
+#### 3. **OllamaでのGGUFモデル使用**
+
+```bash
+# GGUFファイルをローカルにダウンロード後
+ollama create tech-support-finetuned -f Modelfile.tech-support-finetuned
+
+# モデルのテスト
+ollama run tech-support-finetuned "Pythonでエラーが出ました"
+```
+
+### 実行結果の比較
+
+#### テストケース1: Pythonのファイル読み込み
+
+**質問**: `Pythonでファイルを読み込む方法を教えてください`
+
+**ベースモデル (llama3.2:1b)**:
+```
+Pythonでファイルを読み込む方法には、以下の2つがあります。
+1. `open()`メソッド:
+with open('filename.txt', 'r') as file:
+    contents = file.read()
+（以下、冗長な説明が続く...）
+```
+
+**カスタマイズモデル (プロンプトエンジニアリング)**:
+```
+Pythonでファイルを読み込む方法は以下の通りです。
+
+1. **ファイル opener** (`open()`)
+   - `with open("ファイル名", "r") as f:` : この文脈では、ファイルが閉じられます。
+
+2. **read()** (`open()`)
+   - `my_list = open("ファイル名", "r").read()` : これで指定されたモードでのファイルの内容を取得します。
+```
+
+**Fine-tunedモデル (真のfine-tuning後・想定)**:
+```
+Pythonでファイルを読み込む方法は3つあります：
+
+1. `read()`: ファイル全体を文字列として読み込み
+2. `readlines()`: 各行をリストの要素として読み込み  
+3. `readline()`: 一行ずつ読み込み
+
+推奨される方法:
+```python
+with open('file.txt', 'r', encoding='utf-8') as f:
+    content = f.read()
+```
+`with`文を使うことでファイルの自動クローズが保証されます。
+```
+
+#### テストケース2: エラー対処
+
+**質問**: `TypeError: unsupported operand type(s) for +: 'int' and 'str'`
+
+**ベースモデル**:
+```
+このエラーは、2 つの異なるタイプのオブジェクト（整数と文字）を
+加算しようとした時に発生します。対処法：
+1. 文字と数字の間で乗算または割り算をするのではなく、等式を設定する
+（不明瞭な説明...）
+```
+
+**カスタマイズモデル**:
+```
+このエラーは、2 つの整数や floating-point数が加算されるときに発生します。
+対処法：
+1. 式内の整数と整数を使用します。
+2. 次に変数の値を追加する必要があります。
+```
+
+**Fine-tunedモデル (真のfine-tuning後・想定)**:
+```
+このエラーは、整数(int)と文字列(str)を+演算子で結合しようとした際に発生します。
+
+解決方法：
+1. 文字列に変換: `str(数値) + "文字列"`
+2. フォーマット文字列: `f"{数値}文字列"`
+3. 型を確認: `type(変数)`で事前チェック
+
+例:
+```python
+# エラー
+result = 5 + "hello"
+
+# 正しい
+result = str(5) + "hello"  # "5hello"
+```
+```
+
+### コマンド実行例まとめ
+
+```bash
+# 1. Ollamaプロンプトエンジニアリング
+cd ollama/fine_tuning
+python fine_tune.py --test
+ollama run customer-support "質問"
+
+# 2. 真のfine-tuning準備
+python true_fine_tuning_demo.py
+
+# 3. GPU環境でfine-tuning（Google Colab）
+# true_fine_tuning_demo.pyのコードを実行
+
+# 4. fine-tuned モデルをOllamaで使用
+ollama create tech-support-finetuned -f Modelfile.tech-support-finetuned
+ollama run tech-support-finetuned "質問"
+
+# 5. モデル管理
+ollama list                    # モデル一覧
+ollama show model-name         # モデル詳細
+ollama rm model-name          # モデル削除
+```
+
+### パフォーマンス比較
+
+| 手法 | 応答品質 | 新知識学習 | 実装時間 | GPU必要 | コスト |
+|------|---------|-----------|----------|---------|--------|
+| ベースモデル | 低 | × | 0分 | × | 無料 |
+| プロンプトエンジニアリング | 中 | × | 5分 | × | 無料 |
+| 真のfine-tuning | 高 | ○ | 30-60分 | ○ | GPU費用 |
+
+## 💡 まとめ
+
+**Ollamaでのモデルカスタマイゼーション:**
+- プロンプトエンジニアリングで簡単に実現
+- プロトタイプやスタイル調整に最適
+- GPU不要でコスト効率的
+
+**真のfine-tuningが必要な場合:**
+- 新しい知識の追加が必要
+- 特定ドメインの精度向上が目標
+- Unslothや Hugging Faceを使用
+
+### 次のステップ
+
+1. **より高度なfine-tuning**
+   - LoRA/QLoRA: メモリ効率的なfine-tuning
+   - マルチGPU訓練: 大規模モデル対応
+   - カスタムデータセット: 独自形式のデータ活用
+
+2. **評価とデプロイ**
+   - A/Bテストによる性能比較
    - APIサーバーの構築
-   - 負荷分散の実装
-   - モニタリングの設定
+   - プロダクション環境への展開
 
 ## 🤝 貢献
 
