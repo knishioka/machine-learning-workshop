@@ -1,10 +1,12 @@
-# 📁 Fine-tuningディレクトリ構成
+# 📁 Ollama + Fine-tuningディレクトリ構成
+
+> **重要**: OllamaはFine-tuning機能を持たないため、このディレクトリは「外部ツールでFine-tuning → Ollamaで実行」というワークフローを実現するための構成です。
 
 ## ディレクトリ構造
 
 ```
 fine_tuning/
-├── README.md                    # メインガイド（Ollamaカスタマイゼーション＆真のfine-tuning）
+├── README.md                    # メインガイド（外部Fine-tuning → Ollama実行）
 ├── STRUCTURE.md                 # このファイル（ディレクトリ構成説明）
 │
 ├── docs/                        # ドキュメント

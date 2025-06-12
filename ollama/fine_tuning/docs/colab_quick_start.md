@@ -1,4 +1,6 @@
-# 🚀 Google Colabで最小限のFine-tuning - クイックスタート
+# 🚀 Google ColabでFine-tuning → Ollama実行 クイックスタート
+
+> **説明**: Google ColabのGPUを使ってFine-tuningを行い、結果をOllamaで実行する最速の方法です。Ollama自体はFine-tuning機能を持たないため、外部ツール（Unsloth）を使用します。
 
 ## 📋 概要
 
@@ -6,6 +8,7 @@
 - **使用モデル**: TinyLlama 1.1B（最軽量）
 - **必要データ**: 10-50サンプル
 - **出力**: Ollama対応GGUFファイル
+- **ワークフロー**: Colab(Fine-tuning) → GGUF変換 → Ollama実行
 
 ## 🎯 手順（5ステップ）
 

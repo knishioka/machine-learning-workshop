@@ -1,6 +1,8 @@
 # MacでのLocal Fine-tuningガイド
 
-## 📱 Macでのfine-tuning可能性
+> **注意**: このガイドは外部ツール（MLX、PyTorch等）でFine-tuningを行い、その結果をOllamaで使用する方法を説明しています。Ollama自体にFine-tuning機能はありません。
+
+## 📱 Macでの外部ツールを使ったFine-tuning
 
 ### ✅ 可能なケース
 
@@ -62,7 +64,9 @@ model = AutoModelForCausalLM.from_pretrained(
 
 ## 🛠️ 実践的なMac fine-tuningセットアップ
 
-### 方法1: MLX-LMを使用（M1/M2/M3 Mac推奨）
+### 方法1: MLX-LMを使用（Apple Silicon Mac推奨）
+
+**ワークフロー**: MLXでFine-tuning → GGUF変換 → Ollamaで実行
 
 ```bash
 # 1. 環境セットアップ
@@ -84,7 +88,9 @@ python -m mlx_lm.lora \
   --iters 100
 ```
 
-### 方法2: 量子化モデルでのQLoRA
+### 方法2: PyTorch + PEFTでのFine-tuning
+
+**ワークフロー**: PyTorchでFine-tuning → GGUF変換 → Ollamaで実行
 
 ```python
 # qlora_mac.py
@@ -176,16 +182,30 @@ training_args = TrainingArguments(
 sudo powermetrics --samplers smc | grep -i "temperature"
 ```
 
-## 🔄 OllamaへのGGUF変換
+## 🔄 Fine-tuning結果をOllamaで使用
 
-Fine-tuning後、Ollamaで使用するには：
+Fine-tuning完了後の手順：
 
+### 1. モデルのGGUF変換
 ```bash
-# 1. PyTorchモデルをGGUF変換
+# llama.cppのconvert.pyを使用
 python convert.py model_path --outfile model.gguf --outtype q4_0
+```
 
-# 2. Ollamaで使用
-ollama create my-mac-model -f Modelfile
+### 2. Modelfile作成
+```dockerfile
+FROM ./model.gguf
+
+SYSTEM "あなたは親切なアシスタントです。"
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+```
+
+### 3. Ollamaでモデル作成
+```bash
+ollama create my-finetuned-model -f Modelfile
+ollama run my-finetuned-model "質問"
 ```
 
 ## 💡 推奨事項

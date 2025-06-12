@@ -1,16 +1,43 @@
-# Ollama Fine-tuning ガイド
+# Ollamaで使用するためのFine-tuningガイド
 
-このディレクトリには、Ollamaを使用してカスタムモデルをfine-tuningするためのサンプルコードとデータが含まれています。
+> **重要**: Ollama自体はFine-tuning機能を提供していません。このガイドでは、外部ツールでFine-tuningを行い、その結果をOllamaで使用する方法を説明します。
 
 ## 📋 概要
 
-Ollamaは、ローカル環境で大規模言語モデル（LLM）を実行できるツールです。このガイドでは、カスタマーサポート用チャットボットを例に、独自のデータでモデルをカスタマイズする方法を説明します。
+### なぜOllamaでFine-tuningができないのか？
+
+Ollamaは以下の理由でFine-tuningをサポートしていません：
+
+1. **設計思想**: Ollamaは「モデルの実行」に特化したツールで、訓練機能は含まれていません
+2. **リソース制約**: Fine-tuningには大量のGPUメモリと計算リソースが必要ですが、Ollamaはローカル実行を前提としています
+3. **技術的制限**: OllamaはGGUF形式のモデルを使用しますが、Fine-tuningは通常PyTorchやTensorFlow形式で行われます
+
+### Ollamaでできること・できないこと
+
+**✅ できること (プロンプトエンジニアリング)**:
+- Modelfileを使用したシステムプロンプトのカスタマイズ
+- Few-shot学習の例を追加
+- パラメータ（temperature、top_pなど）の調整
+- 既存モデルの動作をある程度カスタマイズ
+
+**❌ できないこと (真のFine-tuning)**:
+- モデルの重みの更新
+- 新しい知識の学習
+- ドメイン特化型の深い学習
+
+### このガイドのアプローチ
+
+本ガイドでは、以下の2段階アプローチを採用しています：
+
+1. **外部ツールでFine-tuning**: PyTorch、Hugging Face、Unslothなどを使用
+2. **Ollamaで実行**: Fine-tuningしたモデルをGGUF形式に変換してOllamaで使用
 
 ### このリポジトリに含まれるもの
 
-- `training_data.jsonl` - カスタマーサポート用の訓練データ
-- `fine_tune.py` - Fine-tuning実行スクリプト
-- `customer-support.modelfile` - カスタムモデル定義ファイル
+- `scripts/mac_local_fine_tuning.py` - Mac環境でのFine-tuning実行スクリプト（PyTorch使用）
+- `test_finetuned_model.py` - Fine-tuning前後のモデル比較スクリプト
+- `customer-support.modelfile` - Ollama用のモデル設定ファイル（プロンプトエンジニアリング）
+- `finetuned_model/` - Fine-tuningの結果（LoRAアダプター）
 
 ## 🚀 クイックスタート
 
@@ -35,22 +62,28 @@ Ollamaは、ローカル環境で大規模言語モデル（LLM）を実行で�
    python --version  # Python 3.8以上が必要
    ```
 
-### Fine-tuningの実行
+### 実際のワークフロー
 
-1. **基本的な実行方法**
-   ```bash
-   cd ollama/fine_tuning
-   python fine_tune.py --test
-   ```
+#### 方法1: Ollamaのプロンプトエンジニアリング（簡易的）
 
-2. **カスタムパラメータでの実行**
-   ```bash
-   python fine_tune.py \
-     --data training_data.jsonl \
-     --base-model llama3.2:1b \
-     --model-name my-support-bot \
-     --test
-   ```
+```bash
+# Modelfileを作成してシステムプロンプトをカスタマイズ
+ollama create customer-support -f customer-support.modelfile
+ollama run customer-support "商品を返品したいです"
+```
+
+#### 方法2: 真のFine-tuning（推奨）
+
+```bash
+# 1. PyTorchでFine-tuningを実行
+python scripts/mac_local_fine_tuning.py --method pytorch
+
+# 2. モデルの比較テスト
+python test_finetuned_model.py
+
+# 3. (オプション) GGUF形式に変換してOllamaで使用
+# ※ 変換ツールは別途必要
+```
 
 ## 📊 訓練データの形式
 
@@ -585,7 +618,19 @@ ollama rm model-name          # モデル削除
 
 ## まとめ
 
-Ollamaはプロンプトエンジニアリングには強力ですが、真のファインチューニングには対応していません。
+### Ollamaとは何か、何でないか
+
+**Ollamaは**:
+- ✅ ローカルLLM実行ツール
+- ✅ プロンプトエンジニアリングプラットフォーム
+- ✅ モデル配布・共有システム
+
+**Ollamaは違う**:
+- ❌ Fine-tuningツール
+- ❌ モデル訓練プラットフォーム
+- ❌ MLフレームワーク
+
+Ollamaはモデルの「実行」に特化しており、「訓練」機能は意図的に含まれていません。
 
 ### 本検証で確認されたこと
 
@@ -602,7 +647,15 @@ Ollamaはプロンプトエンジニアリングには強力ですが、真の�
    - GGUF形式に変換
    - Ollamaで実行
 
-特定の業務に最適化されたモデルが必要な場合は、適切なモデルサイズと十分なデータでFine-tuningを行うことが重要です。
+### 推奨アプローチ
+
+1. **プロトタイプ**: Ollamaのプロンプトエンジニアリングで素早く検証
+2. **本格運用**: 外部ツールでFine-tuning → GGUF変換 → Ollamaで実行
+3. **選択基準**:
+   - 既存知識の活用で十分 → プロンプトエンジニアリング
+   - 新しい知識・スタイルの学習が必要 → 真のFine-tuning
+
+特定の業務に最適化されたモデルが必要な場合は、適切なモデルサイズと十分なデータで外部ツールを使ったFine-tuningを行い、その結果をOllamaで活用することが最も実用的なアプローチです。
 
 
 ## 🤝 貢献
