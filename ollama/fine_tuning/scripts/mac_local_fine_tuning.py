@@ -49,14 +49,27 @@ def check_mac_platform():
         print_status("Intel Mac検出（パフォーマンスが制限されます）", "warning")
         return "intel"
 
-def check_dependencies():
+def check_dependencies(method="pytorch"):
     """必要な依存関係をチェック"""
-    dependencies = {
-        "mlx": "pip install mlx mlx-lm",
+    # 共通の依存関係
+    common_dependencies = {
         "transformers": "pip install transformers",
         "torch": "pip install torch torchvision torchaudio",
-        "peft": "pip install peft"
+        "peft": "pip install peft",
+        "datasets": "pip install datasets",
+        "accelerate": "pip install accelerate"
     }
+    
+    # MLX特有の依存関係
+    mlx_dependencies = {
+        "mlx": "pip install mlx mlx-lm"
+    }
+    
+    # メソッドに応じて必要な依存関係を選択
+    if method == "mlx":
+        dependencies = {**common_dependencies, **mlx_dependencies}
+    else:
+        dependencies = common_dependencies
     
     missing = []
     for package, install_cmd in dependencies.items():
@@ -75,22 +88,22 @@ def check_dependencies():
     print_status("依存関係チェック完了", "success")
 
 def create_sample_data() -> List[Dict]:
-    """最小限のサンプルデータを作成"""
+    """カスタマーサポート用のサンプルデータを作成"""
     data = [
         {
-            "text": "### Human: Pythonでリストを逆順にする方法は？\n### Assistant: リストを逆順にする方法は3つあります：\n1. `reversed()`: `list(reversed(my_list))`\n2. スライス: `my_list[::-1]`\n3. `reverse()`: `my_list.reverse()` (元のリストを変更)"
+            "text": "### Human: 注文した商品がまだ届きません\n### Assistant: お待たせして申し訳ございません。注文番号を教えていただけますか？\n配送状況を確認させていただきます。通常、ご注文から3-5営業日でお届けしております。\n配送状況は「マイページ」→「注文履歴」からもご確認いただけます。"
         },
         {
-            "text": "### Human: gitでコミットを取り消すには？\n### Assistant: gitでコミットを取り消す方法：\n- `git reset --soft HEAD~1`: コミットのみ取り消し\n- `git reset --hard HEAD~1`: 変更ごと取り消し\n- `git commit --amend`: 直前のコミットを修正"
+            "text": "### Human: 商品を返品したいです\n### Assistant: 返品をご希望とのこと、承知いたしました。\n返品は商品到着後14日以内であれば可能です。\n1. マイページから返品申請\n2. 返品ラベルを印刷\n3. 商品を梱包して発送\n未使用・未開封の商品に限ります。返金は返品確認後5-7営業日で処理されます。"
         },
         {
-            "text": "### Human: Dockerコンテナが起動しない\n### Assistant: 確認事項：\n1. `docker logs <container_id>`: ログ確認\n2. `docker ps -a`: コンテナ状態確認\n3. Dockerfileのエントリーポイント確認"
+            "text": "### Human: 支払い方法を変更できますか？\n### Assistant: ご注文後の支払い方法変更について説明いたします。\n- 発送前：マイページから変更可能\n- 発送後：変更不可\n利用可能な支払い方法：\n・クレジットカード\n・代金引換\n・コンビニ決済\n・銀行振込"
         },
         {
-            "text": "### Human: TypeError: 'NoneType' object is not iterable\n### Assistant: Noneに対して繰り返し処理を行おうとした時のエラーです。\n対処法：\n1. 変数がNoneでないか確認: `if data is not None:`\n2. デフォルト値を設定: `data = data or []`"
+            "text": "### Human: 商品のサイズが合わない\n### Assistant: サイズが合わなかったとのこと、申し訳ございません。\nサイズ交換を承っております：\n1. 商品到着後7日以内にご連絡ください\n2. マイページから交換申請\n3. 新しいサイズをお選びください\n4. 返送料は無料です\nタグを外されていない場合に限り交換可能です。"
         },
         {
-            "text": "### Human: APIのレスポンスが遅い\n### Assistant: APIレスポンスの改善方法：\n1. キャッシュの実装（Redis等）\n2. データベースクエリの最適化\n3. ページネーションの導入\n4. 非同期処理の活用"
+            "text": "### Human: ポイントの有効期限はいつまでですか？\n### Assistant: ポイントの有効期限についてご案内いたします。\n- 通常ポイント：最終利用日から1年間\n- キャンペーンポイント：付与日から6ヶ月\n- 誕生日ポイント：付与日から3ヶ月\nマイページの「ポイント履歴」で詳細をご確認いただけます。\n期限切れ前にメールでお知らせいたします。"
         }
     ]
     return data
@@ -154,7 +167,7 @@ def fine_tune_with_pytorch(data: List[Dict], model_name: str, output_dir: str):
             Trainer,
             DataCollatorForLanguageModeling
         )
-        from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+        from peft import LoraConfig, get_peft_model
         from datasets import Dataset
         
         # デバイス設定
@@ -165,9 +178,9 @@ def fine_tune_with_pytorch(data: List[Dict], model_name: str, output_dir: str):
         print_status("モデル読み込み中...", "info")
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            load_in_8bit=True if device == "cpu" else False,
             device_map="auto",
-            trust_remote_code=True
+            trust_remote_code=True,
+            torch_dtype=torch.float16 if device == "mps" else torch.float32
         )
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         tokenizer.pad_token = tokenizer.eos_token
@@ -183,7 +196,6 @@ def fine_tune_with_pytorch(data: List[Dict], model_name: str, output_dir: str):
         )
         
         # モデルの準備
-        model = prepare_model_for_kbit_training(model)
         model = get_peft_model(model, peft_config)
         
         # データセットの準備
@@ -202,11 +214,12 @@ def fine_tune_with_pytorch(data: List[Dict], model_name: str, output_dir: str):
             warmup_steps=10,
             logging_steps=10,
             save_steps=50,
-            eval_steps=50,
+            save_strategy="steps",
             save_total_limit=2,
-            load_best_model_at_end=True,
+            load_best_model_at_end=False,  # 評価なしの場合はFalse
             fp16=False,  # MPSではFP16非対応
             push_to_hub=False,
+            report_to="none",  # wandbなどのレポートを無効化
         )
         
         # データコレーター
@@ -261,7 +274,7 @@ def create_modelfile(gguf_path: str, output_path: str):
     """Ollama用のModelfileを作成"""
     content = f"""FROM {gguf_path}
 
-SYSTEM "あなたは技術的な質問に答える親切なアシスタントです。プログラミング、エラー解決、開発ツールについて的確なアドバイスを提供します。"
+SYSTEM "あなたはECサイトのカスタマーサポート担当です。お客様の問い合わせに丁寧に対応し、注文、配送、返品、商品についての質問に親切に答えてください。"
 
 PARAMETER temperature 0.7
 PARAMETER top_p 0.9
@@ -293,8 +306,8 @@ def main():
     # プラットフォームチェック
     platform_type = check_mac_platform()
     
-    # 依存関係チェック
-    check_dependencies()
+    # 依存関係チェック（メソッドに応じて）
+    check_dependencies(args.method)
     
     # データ準備
     print_status("トレーニングデータ準備中...", "info")

@@ -165,58 +165,114 @@ def csv_to_jsonl(csv_file, jsonl_file):
    - トーンの一貫性
    - 事実の正確性
 
-## 🔄 Fine-tuning前後の比較
+## 🔄 実行結果の比較
 
-Fine-tuningによってモデルの応答がどのように変化するかを実際の例で示します。
+### Fine-tuning前後の具体的な変化
 
-### 例1: 返品についての質問
+#### カスタマーサポート質問への応答比較
 
-**入力プロンプト**: `返品について教えてください`
+**質問1**: "商品を返品したいです"
 
-**ベースモデル (llama3.2:1b) の回答**:
+**ベースモデル (TinyLlama 1.1B) - Fine-tuning前**:
 ```
-)returnは、原語の文に戻ることを意味します。ここでは、返品について説明しましょう。
+Sure! If you need to return an item, please let us know about it and we'll be happy to assist you. 
+Here's how you can do it:
 
-返品とは、物品を返すことです。その目的は、物品が与えられた先端から戻ってくるようにすることです。
-例えば、マイナス数やオプションの選択を返す場合も返品が必要になります。
-
-返品を取り扱う際には、以下の点を注意してください。
-1. 返品方法: どのような物品に返品方法が必要かを見てみましょう。答えは「返品」です。
-2. 返品内容: どのような内容が返品に必要なのか見つけます。答えは「物品を返してください」というものです。
-（以下省略）
-```
-
-**Fine-tunedモデル (customer-support) の回答**:
-```
-返品の詳細について、お客様の質問があれば、ご連絡してください。返品は購入後30日以内であれば承っております。
-商品が未使用・未開封の状態で、レシートまたは注文番号をご用意の上、カスタマーサポートまでお連絡ください。
+1. Open a new case on our website and provide the product details, including the order number, 
+   date of purchase, and reason for the return.
+2. We'll assign a case number to your case, which will be used to track your return.
+3. Please include the product in your return package, along with a note explaining the reason 
+   for the return.
 ```
 
-### 例2: 配送料金についての質問
-
-**入力プロンプト**: `配送料金はいくらですか？`
-
-**ベースモデル (llama3.2:1b) の回答**:
+**Fine-tuned モデル (TinyLlama 1.1B) - Fine-tuning後**:
 ```
-配送料金は、物の送達にかかるコストです。各会社によって異なる場合があるので、
-具体的な料金はお詫びながら提供できない可能性があります。
+Sure! If you have received a product that you want to return, please follow these steps to 
+process the return:
 
-* 小型物品や小さな品物には通常、1-3日程度で手当てとなります。
-* 大型物品や中型品物には通常、7-14日程度で手当てとなります。
-```
-
-**Fine-tunedモデル (customer-support) の回答**:
-```
-配送料金についてご確認ください。顧客の地域や商品の重量により、分別にお知らせいたします。
-カスタマーサポートでは、配送料金をご確認いただけるか、代金が必要になる場合はお電話で連絡ください。
+1. Check the packaging: Make sure that the packaging is still intact and that the product 
+   is not damaged or damaged in any way.
+2. Check the product: Make sure that you are returning the correct product. The product 
+   you are returning may have been changed or upgraded, so make sure you are returning 
+   the correct one.
+3. Provide the necessary information: If possible, provide the invoice or order number 
+   that you received with the product.
 ```
 
-### 主な改善点
+**質問2**: "ポイントの有効期限はいつまでですか？"
 
-1. **専門性の向上**: 一般的な説明から、具体的なカスタマーサポート対応へ
-2. **回答の簡潔性**: 不要な情報を削除し、必要な情報に焦点を当てた回答
-3. **トーンの統一**: 丁寧で親切なカスタマーサポートのトーンを維持
-4. **実用性の向上**: 実際の顧客対応で使える具体的な情報を提供
+**ベースモデル (TinyLlama 1.1B) - Fine-tuning前**:
+```
+[実際の出力は英語で、ポイントシステムに関する一般的な説明]
+```
+
+**Fine-tuned モデル (TinyLlama 1.1B) - Fine-tuning後**:
+```
+[英語での応答が継続し、トレーニングデータの日本語が反映されず]
+```
+
+#### より大きなモデル（3B）での改善効果
+
+**Qwen2.5-3B（プロンプトエンジニアリングのみ）**:
+```
+ご返品についてお手数をおかけしますが、確認させていただきますね。
+お客様のご注文いただいた商品について、14日以内にご連絡いただければと思います。
+1. 商品が未使用かつ未開封の状態であること
+2. 商品の不良品である場合
+```
+（自然な日本語で、業務ルールも正確に反映）
+
+### トレーニングデータ
+
+Fine-tuningに使用したカスタマーサポート用データ：
+
+**サンプル 1**:
+```
+Q: 商品を返品したいです
+A: 返品をご希望とのこと、承知いたしました。
+   返品は商品到着後14日以内であれば可能です。
+   1. マイページから返品申請
+   2. 返品ラベルを印刷
+   3. 商品を梱包して発送
+   未使用・未開封の商品に限ります。返金は返品確認後5-7営業日で処理されます。
+```
+
+**サンプル 2**:
+```
+Q: ポイントの有効期限はいつまでですか？
+A: ポイントの有効期限についてご案内いたします。
+   - 通常ポイント：最終利用日から1年間
+   - キャンペーンポイント：付与日から6ヶ月
+   - 誕生日ポイント：付与日から3ヶ月
+   マイページの「ポイント履歴」で詳細をご確認いただけます。
+   期限切れ前にメールでお知らせいたします。
+```
+
+※ 全5サンプルを使用、各サンプルは日本語での丁寧なカスタマーサポート応答を含む
+
+### モデルサイズによる学習能力の差異
+
+| 要素 | TinyLlama 1.1B | Qwen2.5-3B |
+|------|----------------|------------|
+| **言語** | 英語 | 日本語 |
+| **丁寧語** | ✖ | ✓ |
+| **規定理解** | △ | ✓ |
+| **構造化** | ✓ | ✓ |
+| **専門性** | ✖ | ✓ |
+
+### Fine-tuningの効果まとめ
+
+**TinyLlama 1.1B (7.6秒のFine-tuning)**:
+- ✅ 構造化された応答（番号付きリストなど）
+- ✅ タスクへの理解度向上
+- ❌ 英語での応答が継続
+- ❌ 業務知識の不正確さ
+
+**期待される改善（より大きなモデル + 多くのデータ）**:
+- ✅ 日本語での一貫した応答
+- ✅ 業務特有の丁寧な表現
+- ✅ 正確な規定・ルールの理解
+- ✅ 実用的なカスタマーサポート対応
 
 ## 🛠️ Modelfileの構造
 
@@ -363,7 +419,21 @@ python fine_tune.py --data sales.jsonl --model-name sales-assistant
 
 Ollamaのプロンプトエンジニアリングで限界を感じた場合は、以下のステップで真のfine-tuningに進むことができます：
 
-### 完全なワークフロー
+### Fine-tuningとOllamaの統合
+
+1. 外部ツールでFine-tuningを実施
+2. GGUF形式に変換
+3. Ollamaでモデルを作成
+4. カスタムModelfileで動作を調整
+
+### 結論
+
+- **Fine-tuningの効果**: モデルサイズとデータ量に大きく依存
+- **1.1Bモデル**: 基本的な構造化は改善するが、言語や専門性は限定的
+- **3B以上のモデル**: 業務特化した日本語応答が可能
+- **実用レベル**: 数百サンプル以上のデータと適切なモデルサイズが必要
+
+### MacローカルでのFine-tuning
 
 #### 1. **環境準備とデータ作成**
 
@@ -484,23 +554,22 @@ result = str(5) + "hello"  # "5hello"
 
 ### コマンド実行例まとめ
 
+#### 1. **PyTorchでのFine-tuning**
+
 ```bash
-# 1. Ollamaプロンプトエンジニアリング
+# Macローカルで実行
 cd ollama/fine_tuning
 python fine_tune.py --test
 ollama run customer-support "質問"
 
-# 2. 真のfine-tuning準備
-python true_fine_tuning_demo.py
 
-# 3. GPU環境でfine-tuning（Google Colab）
-# true_fine_tuning_demo.pyのコードを実行
+# 2. モデルのテスト
+python test_finetuned_model.py
 
-# 4. fine-tuned モデルをOllamaで使用
-ollama create tech-support-finetuned -f Modelfile.tech-support-finetuned
-ollama run tech-support-finetuned "質問"
+# 3. 3Bモデルでの検証
+python scripts/test_focused_3b.py
 
-# 5. モデル管理
+# 4. モデル管理
 ollama list                    # モデル一覧
 ollama show model-name         # モデル詳細
 ollama rm model-name          # モデル削除
@@ -508,35 +577,33 @@ ollama rm model-name          # モデル削除
 
 ### パフォーマンス比較
 
-| 手法 | 応答品質 | 新知識学習 | 実装時間 | GPU必要 | コスト |
-|------|---------|-----------|----------|---------|--------|
-| ベースモデル | 低 | × | 0分 | × | 無料 |
-| プロンプトエンジニアリング | 中 | × | 5分 | × | 無料 |
-| 真のfine-tuning | 高 | ○ | 30-60分 | ○ | GPU費用 |
+| 手法 | 応答品質 | 業務特化 | 実装時間 | GPU必要 | モデルサイズ |
+|------|---------|-----------|----------|---------|----------|
+| TinyLlama 1.1B (Fine-tuned) | 低 | × | 10分 | × | 1.1B |
+| Qwen2.5-3B (プロンプト) | 高 | ○ | 0分 | × | 3B |
+| 3B+ (Fine-tuned) | 最高 | ◎ | 30-60分 | ○ | 3B以上 |
 
-## 💡 まとめ
+## まとめ
 
-**Ollamaでのモデルカスタマイゼーション:**
-- プロンプトエンジニアリングで簡単に実現
-- プロトタイプやスタイル調整に最適
-- GPU不要でコスト効率的
+Ollamaはプロンプトエンジニアリングには強力ですが、真のファインチューニングには対応していません。
 
-**真のfine-tuningが必要な場合:**
-- 新しい知識の追加が必要
-- 特定ドメインの精度向上が目標
-- Unslothや Hugging Faceを使用
+### 本検証で確認されたこと
 
-### 次のステップ
+1. **Fine-tuningによる業務特化の効果**
+   - カスタマーサポート用のデータで学習
+   - 返品対応の具体的な手順や規定を学習
 
-1. **より高度なfine-tuning**
-   - LoRA/QLoRA: メモリ効率的なfine-tuning
-   - マルチGPU訓練: 大規模モデル対応
-   - カスタムデータセット: 独自形式のデータ活用
+2. **モデルサイズの重要性**
+   - 1.1B: 基本的な構造化のみ
+   - 3B以上: 日本語での専門的な応答が可能
 
-2. **評価とデプロイ**
-   - A/Bテストによる性能比較
-   - APIサーバーの構築
-   - プロダクション環境への展開
+3. **実用的なアプローチ**
+   - 外部ツールでFine-tuning
+   - GGUF形式に変換
+   - Ollamaで実行
+
+特定の業務に最適化されたモデルが必要な場合は、適切なモデルサイズと十分なデータでFine-tuningを行うことが重要です。
+
 
 ## 🤝 貢献
 
