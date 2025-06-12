@@ -20,9 +20,14 @@ python scripts/mac_local_fine_tuning.py --method pytorch
 # データ準備
 python scripts/mac_local_fine_tuning.py --method mlx
 
-# または手動で実行
+# モデルサイズを選択
+python scripts/mac_local_fine_tuning.py --method mlx --mlx-model small  # 1.5B
+python scripts/mac_local_fine_tuning.py --method mlx --mlx-model medium # 3B
+python scripts/mac_local_fine_tuning.py --method mlx --mlx-model large  # 7B
+
+# または手動で実行（利用可能なモデル）
 python -m mlx_lm.lora \
-    --model mlx-community/Llama-3.2-1B-4bit \
+    --model mlx-community/Qwen2.5-1.5B-Instruct-4bit \
     --train \
     --data ./finetuned_model/training_data.jsonl \
     --adapter-path ./finetuned_model \
@@ -61,6 +66,12 @@ open notebooks/minimal_colab_fine_tuning.ipynb
 Google Colabにアップロードして実行（約20分）
 
 ## トラブルシューティング
+
+### エラー: `Repository Not Found for url: https://huggingface.co/...`
+→ モデル名が正しくありません。以下の利用可能なモデルを使用してください：
+- `mlx-community/Qwen2.5-1.5B-Instruct-4bit` (小)
+- `mlx-community/Qwen2.5-3B-Instruct-4bit` (中)
+- `mlx-community/Mistral-7B-Instruct-v0.2-4bit` (大)
 
 ### エラー: `unrecognized arguments: --lora-rank`
 → このエラーは修正済みです。最新のスクリプトを使用してください。

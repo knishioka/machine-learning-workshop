@@ -95,14 +95,27 @@ def create_sample_data() -> List[Dict]:
     ]
     return data
 
-def fine_tune_with_mlx(data_path: str, output_path: str, iterations: int = 100):
+def fine_tune_with_mlx(data_path: str, output_path: str, iterations: int = 100, model_name: str = None):
     """MLXを使用したfine-tuning"""
     print_status("MLXでのfine-tuning開始", "info")
+    
+    # デフォルトモデルの選択（メモリに応じて）
+    if model_name is None:
+        # 利用可能なMLXモデル
+        available_models = {
+            "small": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",  # 1.5B - 最小
+            "medium": "mlx-community/Qwen2.5-3B-Instruct-4bit",   # 3B - バランス
+            "large": "mlx-community/Mistral-7B-Instruct-v0.2-4bit" # 7B - 高品質
+        }
+        
+        # デフォルトは小さいモデル
+        model_name = available_models["small"]
+        print_status(f"使用モデル: {model_name}", "info")
     
     # MLXコマンドの構築（正しいオプション）
     cmd = f"""
 python -m mlx_lm.lora \\
-    --model mlx-community/Llama-3.2-1B-4bit \\
+    --model {model_name} \\
     --train \\
     --data {data_path} \\
     --adapter-path {output_path} \\
@@ -266,6 +279,8 @@ def main():
                         help='Fine-tuning手法の選択')
     parser.add_argument('--model', type=str, default='TinyLlama/TinyLlama-1.1B-Chat-v1.0',
                         help='ベースモデル（PyTorch使用時）')
+    parser.add_argument('--mlx-model', type=str, choices=['small', 'medium', 'large'], default='small',
+                        help='MLXモデルサイズ: small(1.5B), medium(3B), large(7B)')
     parser.add_argument('--iterations', type=int, default=100,
                         help='トレーニングイテレーション数')
     parser.add_argument('--output-dir', type=str, default='./finetuned_model',
@@ -297,7 +312,14 @@ def main():
     # Fine-tuning実行
     if args.method == 'mlx' and platform_type == 'apple_silicon':
         print_status("MLXを使用したfine-tuningを選択", "info")
-        success = fine_tune_with_mlx(data_path, args.output_dir, args.iterations)
+        # MLXモデルサイズに応じたモデル名を取得
+        mlx_models = {
+            "small": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+            "medium": "mlx-community/Qwen2.5-3B-Instruct-4bit",
+            "large": "mlx-community/Mistral-7B-Instruct-v0.2-4bit"
+        }
+        mlx_model = mlx_models.get(args.mlx_model, mlx_models["small"])
+        success = fine_tune_with_mlx(data_path, args.output_dir, args.iterations, mlx_model)
     else:
         if args.method == 'mlx' and platform_type == 'intel':
             print_status("Intel MacではMLXは最適ではありません。PyTorchを使用します。", "warning")
