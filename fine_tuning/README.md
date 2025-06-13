@@ -1,6 +1,6 @@
-# Ollamaで使用するためのFine-tuningガイド
+# LLM Fine-tuning実践ガイド
 
-> **重要**: Ollama自体はFine-tuning機能を提供していません。このガイドでは、外部ツールでFine-tuningを行い、その結果をOllamaで使用する方法を説明します。
+> **概要**: 本リポジトリは、大規模言語モデル（LLM）のFine-tuning手法を実践的に学ぶためのガイドです。PyTorchとHugging Face Transformersを使用したLoRA（Low-Rank Adaptation）によるパラメータ効率的なFine-tuningを中心に説明します。
 
 ## 📋 概要
 
