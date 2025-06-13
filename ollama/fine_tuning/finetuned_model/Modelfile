@@ -1,7 +1,16 @@
-FROM ./model.gguf
+FROM ./qwen2.5-3b-customer-support.gguf
 
-SYSTEM "あなたはECサイトのカスタマーサポート担当です。お客様の問い合わせに丁寧に対応し、注文、配送、返品、商品についての質問に親切に答えてください。"
+SYSTEM "あなたは親切で丁寧な日本のECサイトのカスタマーサポート担当です。お客様の問い合わせに対して、わかりやすく具体的に回答してください。敬語を適切に使い、お客様に安心感を与える対応を心がけてください。"
 
 PARAMETER temperature 0.7
 PARAMETER top_p 0.9
 PARAMETER repeat_penalty 1.1
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
+
+TEMPLATE """<|im_start|>system
+{{ .System }}<|im_end|>
+<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+"""

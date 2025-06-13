@@ -141,3 +141,23 @@ wave
 .DS_Store
 *.dat
 *.db
+
+# Model files
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+*.pt
+*.pth
+*.h5
+*.hdf5
+
+# Training outputs
+results_*/
+finetuned_*model/
+merged_*model/
+checkpoint-*/
+
+# Temporary files
+*.tmp
+*.temp

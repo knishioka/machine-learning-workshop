@@ -69,8 +69,12 @@ def test_finetuned_model():
     
     # Check which fine-tuned model exists
     model_paths = [
+        "./finetuned_tinyllama_extended_model",
+        "./scripts/finetuned_tinyllama_extended_model",
         "./finetuned_tinyllama_model",
         "./scripts/finetuned_tinyllama_model",
+        "./finetuned_tinyllama_100samples_model",
+        "./scripts/finetuned_tinyllama_100samples_model",
         "./finetuned_tinyllama_balanced_model",
         "./scripts/finetuned_tinyllama_balanced_model",
         "./finetuned_tinyllama_enhanced_model",
