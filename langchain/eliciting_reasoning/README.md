@@ -1,10 +1,11 @@
 # Cognitive Tools Implementation with LangGraph
 
-This project implements the cognitive tools approach from the paper "Teaching Language Models to Decode Cognitive Psychology" using LangGraph.
+This project implements the cognitive tools approach from the paper "Eliciting Reasoning in Language Models with Cognitive Tools" using LangGraph.
 
-📄 **Paper**: Teaching Language Models to Decode Cognitive Psychology  
+📄 **Paper**: [Eliciting Reasoning in Language Models with Cognitive Tools](https://arxiv.org/abs/2506.12115)  
 🔧 **Framework**: LangGraph + LangChain  
-📊 **Models Tested**: GPT-4, GPT-3.5-turbo, Claude-3.5-Sonnet
+📊 **Models Tested**: GPT-4, GPT-3.5-turbo, Claude-3.5-Sonnet  
+👥 **Authors**: Brown Ebouky, Andrea Bartezzaghi, Mattia Rigotti (2025)
 
 ## Overview
 
@@ -179,7 +180,17 @@ See the [comprehensive report](COMPREHENSIVE_FINAL_REPORT.md) for detailed analy
 ## Citation
 
 Based on the paper:
-```
-Teaching Language Models to Decode Cognitive Psychology
-[Paper reference]
+
+> **Eliciting Reasoning in Language Models with Cognitive Tools**  
+> Brown Ebouky, Andrea Bartezzaghi, Mattia Rigotti  
+> arXiv:2506.12115 [cs.CL], June 2025  
+> https://arxiv.org/abs/2506.12115
+
+```bibtex
+@article{ebouky2025eliciting,
+  title={Eliciting Reasoning in Language Models with Cognitive Tools},
+  author={Ebouky, Brown and Bartezzaghi, Andrea and Rigotti, Mattia},
+  journal={arXiv preprint arXiv:2506.12115},
+  year={2025}
+}
 ```
