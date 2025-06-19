@@ -175,7 +175,7 @@ Problems should be in JSON format:
 - ✅ Direct pattern recognition
 - ✅ When token efficiency matters (10x fewer tokens)
 
-See the [comprehensive report](COMPREHENSIVE_FINAL_REPORT.md) for detailed analysis.
+See the [experiment results](EXPERIMENT_RESULTS.md) for detailed analysis.
 
 ## Citation
 
