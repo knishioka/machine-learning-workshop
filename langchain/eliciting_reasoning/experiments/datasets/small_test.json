@@ -1,0 +1,25 @@
+{
+  "problems": [
+    {
+      "id": "simple_1",
+      "question": "What is 5 + 3?",
+      "answer": "8",
+      "type": "arithmetic",
+      "difficulty": "easy"
+    },
+    {
+      "id": "algebra_simple",
+      "question": "Solve for x: x + 5 = 12",
+      "answer": "7",
+      "type": "algebra",
+      "difficulty": "easy"
+    },
+    {
+      "id": "multiplication_1",
+      "question": "What is 6 \u00d7 7?",
+      "answer": "42",
+      "type": "arithmetic",
+      "difficulty": "easy"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "problems": [
+    {
+      "id": "gcd_1",
+      "question": "Find the greatest common divisor (GCD) of 48 and 18.",
+      "answer": "6",
+      "type": "number_theory",
+      "difficulty": "medium"
+    },
+    {
+      "id": "algebra_1",
+      "question": "Solve for x: 2x^2 - 8x + 6 = 0",
+      "answer": "x = 1 or x = 3",
+      "type": "algebra",
+      "difficulty": "medium"
+    },
+    {
+      "id": "series_1",
+      "question": "Find the sum of the first 10 terms of the arithmetic sequence where a₁ = 3 and d = 4.",
+      "answer": "210",
+      "type": "sequences",
+      "difficulty": "medium"
+    },
+    {
+      "id": "probability_1",
+      "question": "A bag contains 5 red balls and 3 blue balls. If you draw 2 balls without replacement, what is the probability that both are red?",
+      "answer": "5/14",
+      "type": "probability",
+      "difficulty": "medium"
+    },
+    {
+      "id": "modular_1",
+      "question": "What is the remainder when 2^10 is divided by 7?",
+      "answer": "2",
+      "type": "number_theory",
+      "difficulty": "medium"
+    }
+  ]
+}

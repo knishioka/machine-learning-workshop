@@ -1,0 +1,39 @@
+{
+  "problems": [
+    {
+      "id": "complex_1",
+      "question": "Find all positive integer solutions to the equation x^3 + y^3 = z^3 + 1 where x, y, z < 100.",
+      "answer": "No solutions exist",
+      "type": "number_theory",
+      "difficulty": "hard"
+    },
+    {
+      "id": "complex_2",
+      "question": "A sequence is defined by a_1 = 1, a_2 = 1, and a_n = a_{n-1} + a_{n-2} for n ≥ 3. Find the remainder when a_{100} is divided by 9.",
+      "answer": "3",
+      "type": "sequences",
+      "difficulty": "hard"
+    },
+    {
+      "id": "complex_3",
+      "question": "How many ways can you place 8 non-attacking rooks on a chessboard such that no rook is on the main diagonal?",
+      "answer": "14833",
+      "type": "combinatorics",
+      "difficulty": "hard"
+    },
+    {
+      "id": "complex_4",
+      "question": "Find the number of integer solutions to |x| + |y| + |z| = 10.",
+      "answer": "1212",
+      "type": "combinatorics",
+      "difficulty": "hard"
+    },
+    {
+      "id": "complex_5",
+      "question": "Let f(x) = x^5 - 5x^3 + 5x. Find all real solutions to f(f(x)) = x.",
+      "answer": "x = -2, -1, 0, 1, 2",
+      "type": "algebra",
+      "difficulty": "hard"
+    }
+  ]
+}

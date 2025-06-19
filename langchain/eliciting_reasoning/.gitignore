@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Development
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+docs/*.pdf
+results/*.json
+results/*.png
+results/*.md
+!results/.gitkeep
+
+# Test/debug scripts
+debug_*.py
+test_*.py
+
+# Environment
+.env
