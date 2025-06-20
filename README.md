@@ -1,6 +1,56 @@
 # 機械学習の社会実装勉強会
 毎月開催している[機械学習の社会実装勉強会](https://machine-learning-workshop.connpass.com/)で利用したスクリプトなどを共有するレポジトリ。
 
+## セットアップ
+
+このプロジェクトでは[uv](https://github.com/astral-sh/uv)を使用してPythonパッケージを管理しています。
+
+### 前提条件
+- Python 3.10以上
+- uvのインストール
+
+### uvのインストール
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# または pipを使用
+pip install uv
+```
+
+### 環境構築
+```bash
+# リポジトリのクローン
+git clone https://github.com/your-username/machine-learning-workshop.git
+cd machine-learning-workshop
+
+# 仮想環境の作成
+uv venv
+
+# 仮想環境の有効化
+source .venv/bin/activate  # macOS/Linux
+# .venv\Scripts\activate  # Windows
+
+# 依存関係のインストール
+uv pip install -r <(sed -n '/dependencies = \[/,/\]/p' pyproject.toml | grep -E '^\s*"' | sed 's/.*"\(.*\)".*/\1/' | grep -v '^#')
+
+# 開発用依存関係のインストール（オプション）
+uv pip install 'pytest>=7.4.0' 'pytest-asyncio>=0.21.0' 'pytest-cov>=4.1.0' 'black>=24.0.0' 'ruff>=0.5.0' 'mypy>=1.5.0' 'isort>=5.12.0' 'pre-commit>=3.5.0'
+```
+
+### オプションの依存関係
+プラットフォーム固有のパッケージは以下のようにインストールできます：
+```bash
+# MXNet（x86_64プラットフォームのみ）
+uv pip install 'mxnet>=1.9.1'
+
+# 完全なAutoGluon（MXNetが必要）
+uv pip install 'autogluon>=1.1.1'
+
+# CUDA対応パッケージ（GPUが必要）
+uv pip install 'bitsandbytes>=0.43.0'
+```
+
 ## 過去の勉強会のスクリプト
 - [LangGraphを用いたAIアプリケーションにおけるメモリ永続化の実践 (機械学習の社会実装勉強会第38回)](https://speakerdeck.com/knishioka/langgraphwoyong-itaaiapurikesiyonniokerumemoriyong-sok-hua-noshi-jian)
     - [langchain/langchain_persistence.ipynb](langchain/langchain_persistence.ipynb)

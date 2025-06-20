@@ -161,3 +161,5 @@ checkpoint-*/
 # Temporary files
 *.tmp
 *.temp
+# Virtual Environment
+.venv/

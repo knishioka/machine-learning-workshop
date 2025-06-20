@@ -24,13 +24,13 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "q_proj",
-    "o_proj",
-    "gate_proj",
-    "v_proj",
     "k_proj",
     "up_proj",
-    "down_proj"
+    "down_proj",
+    "q_proj",
+    "gate_proj",
+    "o_proj",
+    "v_proj"
   ],
   "task_type": "CAUSAL_LM",
   "trainable_token_indices": null,
