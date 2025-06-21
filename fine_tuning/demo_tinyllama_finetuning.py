@@ -152,6 +152,7 @@ def main():
         fp16=False,  # MPSではFP16を無効化
         push_to_hub=False,
         report_to=[],  # ログ出力を無効化
+        dataloader_pin_memory=False,  # この行を追加
     )
 
     # トレーナーの作成
@@ -159,7 +160,8 @@ def main():
         model=model,
         args=training_args,
         train_dataset=tokenized_dataset,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
+        data_collator=None,
     )
 
     # Fine-tuning実行

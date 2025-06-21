@@ -25,12 +25,12 @@
   "revision": null,
   "target_modules": [
     "k_proj",
-    "up_proj",
     "down_proj",
-    "q_proj",
+    "v_proj",
     "gate_proj",
+    "q_proj",
     "o_proj",
-    "v_proj"
+    "up_proj"
   ],
   "task_type": "CAUSAL_LM",
   "trainable_token_indices": null,
