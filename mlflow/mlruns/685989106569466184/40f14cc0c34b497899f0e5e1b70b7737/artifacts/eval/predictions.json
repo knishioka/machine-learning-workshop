@@ -1,0 +1,34 @@
+[
+  {
+    "question": "2+2?",
+    "prediction": "4",
+    "reference": "4",
+    "em": 1.0,
+    "latency": 3.814697265625e-06,
+    "cost": 0.001
+  },
+  {
+    "question": "3*5?",
+    "prediction": "15",
+    "reference": "15",
+    "em": 1.0,
+    "latency": 1.9073486328125e-06,
+    "cost": 0.002
+  },
+  {
+    "question": "What is RAG?",
+    "prediction": "RAG is Retrieval-Augmented Generation.",
+    "reference": "RAG is Retrieval-Augmented Generation.",
+    "em": 1.0,
+    "latency": 2.1457672119140625e-06,
+    "cost": 0.038
+  },
+  {
+    "question": "Capital of France?",
+    "prediction": "Paris",
+    "reference": "Paris",
+    "em": 1.0,
+    "latency": 7.152557373046875e-07,
+    "cost": 0.005
+  }
+]

@@ -1,0 +1,6 @@
+artifact_location: file:///Users/ken/Developer/private/machine-learning-workshop/mlflow/mlruns/685989106569466184
+creation_time: 1756354178722
+experiment_id: '685989106569466184'
+last_update_time: 1756354178722
+lifecycle_stage: active
+name: mlflow-llm-live-demo

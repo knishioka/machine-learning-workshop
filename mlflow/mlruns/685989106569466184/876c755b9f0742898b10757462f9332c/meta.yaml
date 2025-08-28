@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/ken/Developer/private/machine-learning-workshop/mlflow/mlruns/685989106569466184/876c755b9f0742898b10757462f9332c/artifacts
+end_time: 1756354420118
+entry_point_name: ''
+experiment_id: '685989106569466184'
+lifecycle_stage: active
+run_id: 876c755b9f0742898b10757462f9332c
+run_name: grid-run-2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1756354420104
+status: 3
+tags: []
+user_id: ken
