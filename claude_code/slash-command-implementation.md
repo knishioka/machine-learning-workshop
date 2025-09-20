@@ -1,0 +1,387 @@
+# Terms of Service Slash Command Implementation
+
+## Command Structure
+
+```typescript
+interface TermsOfServiceCommand {
+  name: '/terms-of-service';
+  alias: '/tos';
+  description: 'Create, review, and manage terms of service documents';
+
+  subcommands: {
+    create: CreateTermsCommand;
+    review: ReviewTermsCommand;
+    update: UpdateTermsCommand;
+    audit: AuditTermsCommand;
+  };
+
+  agents: {
+    'legal-compliance-reviewer': LegalComplianceAgent;
+    'privacy-data-specialist': PrivacyDataAgent;
+    'risk-liability-assessor': RiskLiabilityAgent;
+    'user-rights-advocate': UserRightsAgent;
+    'technical-integration-specialist': TechnicalIntegrationAgent;
+    'ip-protection-expert': IPProtectionAgent;
+    'commercial-terms-negotiator': CommercialTermsAgent;
+    'compliance-auditor': ComplianceAuditAgent;
+  };
+}
+```
+
+## Implementation Flow
+
+### 1. Create Command
+
+```javascript
+async function createTermsOfService(options) {
+  const config = {
+    type: options.type || 'saas',
+    jurisdiction: options.jurisdiction || 'us',
+    compliance: options.compliance || ['gdpr', 'ccpa'],
+    language: options.language || 'en',
+    industry: options.industry || 'general'
+  };
+
+  // Phase 1: Requirements Gathering
+  const requirements = await gatherRequirements(config);
+
+  // Phase 2: Parallel Agent Execution
+  const agentResults = await Promise.all([
+    legalComplianceAgent.analyze(requirements),
+    privacyDataAgent.design(requirements),
+    riskLiabilityAgent.assess(requirements),
+    userRightsAgent.review(requirements),
+    commercialTermsAgent.structure(requirements),
+    ipProtectionAgent.define(requirements),
+    technicalIntegrationAgent.specify(requirements)
+  ]);
+
+  // Phase 3: Synthesis
+  const synthesizedTerms = await synthesizeResults(agentResults);
+
+  // Phase 4: Compliance Check
+  const complianceReport = await complianceAuditor.audit(synthesizedTerms);
+
+  // Phase 5: Accessibility Review
+  const accessibleVersion = await userRightsAgent.makeAccessible(synthesizedTerms);
+
+  return {
+    fullTerms: synthesizedTerms,
+    simplifiedTerms: accessibleVersion,
+    complianceReport: complianceReport,
+    implementationChecklist: generateChecklist(synthesizedTerms)
+  };
+}
+```
+
+### 2. Review Command
+
+```javascript
+async function reviewTermsOfService(filePath, options) {
+  const document = await readDocument(filePath);
+
+  // Phase 1: Document Analysis
+  const parsed = await parseTermsDocument(document);
+
+  // Phase 2: Parallel Agent Review
+  const reviews = await Promise.all([
+    legalComplianceAgent.review(parsed, options.compliance),
+    privacyDataAgent.auditPrivacy(parsed),
+    riskLiabilityAgent.evaluateRisks(parsed),
+    userRightsAgent.checkAccessibility(parsed),
+    commercialTermsAgent.analyzeTerms(parsed)
+  ]);
+
+  // Phase 3: Issue Identification
+  const issues = consolidateIssues(reviews);
+
+  // Phase 4: Recommendation Generation
+  const recommendations = await generateRecommendations(issues);
+
+  return {
+    overallScore: calculateComplianceScore(reviews),
+    criticalIssues: issues.filter(i => i.severity === 'critical'),
+    recommendations: recommendations,
+    detailedReport: generateDetailedReport(reviews, issues)
+  };
+}
+```
+
+### 3. Agent Orchestration
+
+```javascript
+class AgentOrchestrator {
+  constructor() {
+    this.agents = new Map();
+    this.initializeAgents();
+  }
+
+  async executeParallel(task, agents) {
+    const executions = agents.map(agent => ({
+      agentId: agent.id,
+      promise: agent.execute(task)
+    }));
+
+    const results = await Promise.allSettled(
+      executions.map(e => e.promise)
+    );
+
+    return this.processResults(results, executions);
+  }
+
+  async executeSequential(tasks) {
+    const results = [];
+
+    for (const task of tasks) {
+      const agent = this.selectAgent(task.type);
+      const result = await agent.execute(task);
+      results.push(result);
+
+      // Pass results to next agent if needed
+      if (task.passToNext) {
+        tasks[tasks.indexOf(task) + 1].previousResults = result;
+      }
+    }
+
+    return results;
+  }
+
+  selectAgent(taskType) {
+    const agentMap = {
+      'legal': 'legal-compliance-reviewer',
+      'privacy': 'privacy-data-specialist',
+      'risk': 'risk-liability-assessor',
+      'user': 'user-rights-advocate',
+      'commercial': 'commercial-terms-negotiator',
+      'technical': 'technical-integration-specialist',
+      'ip': 'ip-protection-expert',
+      'audit': 'compliance-auditor'
+    };
+
+    return this.agents.get(agentMap[taskType]);
+  }
+}
+```
+
+## Usage Examples
+
+### Example 1: Create SaaS Terms
+
+```bash
+/terms-of-service create \
+  --type saas \
+  --jurisdiction global \
+  --compliance gdpr,ccpa,lgpd \
+  --industry fintech \
+  --language en
+```
+
+**Output Structure:**
+```markdown
+# Terms of Service
+
+## 1. Agreement Summary
+[User-friendly summary generated by user-rights-advocate]
+
+## 2. Full Legal Terms
+[Complete terms synthesized from all agents]
+
+## 3. Compliance Certifications
+[Compliance checklist from compliance-auditor]
+
+## 4. Implementation Guide
+[Technical requirements from technical-integration-specialist]
+```
+
+### Example 2: Review Existing Terms
+
+```bash
+/terms-of-service review \
+  --file ./current-terms.md \
+  --compliance gdpr,ccpa \
+  --output-format detailed
+```
+
+**Output Structure:**
+```markdown
+# Terms of Service Review Report
+
+## Overall Compliance Score: 78/100
+
+## Critical Issues (Immediate Action Required)
+1. Missing GDPR data portability provisions
+2. Inadequate breach notification timeline
+3. No age verification mechanism
+
+## High Priority Recommendations
+[Detailed recommendations from each agent]
+
+## Detailed Analysis
+[Section-by-section review from all agents]
+```
+
+### Example 3: Update for New Regulations
+
+```bash
+/terms-of-service update \
+  --file ./terms.md \
+  --add-compliance dpdp-india \
+  --effective-date 2024-03-01
+```
+
+### Example 4: Comprehensive Audit
+
+```bash
+/terms-of-service audit \
+  --comprehensive \
+  --benchmark-against competitors \
+  --generate-report pdf
+```
+
+## Agent Communication Protocol
+
+```yaml
+agent_communication:
+  message_format:
+    sender: agent_id
+    recipient: agent_id or "orchestrator"
+    message_type: [request, response, alert, update]
+    payload:
+      task: task_description
+      data: relevant_data
+      priority: [critical, high, medium, low]
+
+  collaboration_patterns:
+    parallel:
+      - All agents work simultaneously
+      - No dependencies between agents
+      - Results merged by orchestrator
+
+    sequential:
+      - Agents work in order
+      - Output feeds to next agent
+      - Dependencies respected
+
+    hybrid:
+      - Groups work in parallel
+      - Groups execute sequentially
+      - Optimized for efficiency
+```
+
+## Error Handling
+
+```javascript
+class TermsOfServiceErrorHandler {
+  handleAgentError(agentId, error) {
+    const strategies = {
+      'timeout': () => this.retryWithBackoff(agentId),
+      'invalid_input': () => this.validateAndRetry(agentId),
+      'conflict': () => this.resolveConflict(agentId),
+      'missing_data': () => this.requestAdditionalData(agentId)
+    };
+
+    return strategies[error.type]?.() || this.defaultHandler(error);
+  }
+
+  resolveConflicts(agentResults) {
+    // Priority-based resolution
+    const priorities = {
+      'legal-compliance-reviewer': 1,
+      'privacy-data-specialist': 2,
+      'risk-liability-assessor': 3,
+      'user-rights-advocate': 4,
+      'commercial-terms-negotiator': 5
+    };
+
+    return agentResults.sort((a, b) =>
+      priorities[a.agentId] - priorities[b.agentId]
+    );
+  }
+}
+```
+
+## Performance Optimization
+
+```javascript
+class PerformanceOptimizer {
+  constructor() {
+    this.cache = new Map();
+    this.metrics = new MetricsCollector();
+  }
+
+  async optimizeExecution(task) {
+    // Check cache
+    const cacheKey = this.generateCacheKey(task);
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
+    }
+
+    // Determine optimal execution strategy
+    const strategy = this.selectStrategy(task);
+
+    // Execute with monitoring
+    const startTime = Date.now();
+    const result = await this.executeWithStrategy(task, strategy);
+    const executionTime = Date.now() - startTime;
+
+    // Update metrics
+    this.metrics.record(task.type, executionTime);
+
+    // Cache if appropriate
+    if (task.cacheable) {
+      this.cache.set(cacheKey, result);
+    }
+
+    return result;
+  }
+
+  selectStrategy(task) {
+    if (task.agents.length > 3) return 'parallel';
+    if (task.dependencies.length > 0) return 'sequential';
+    return 'hybrid';
+  }
+}
+```
+
+## Configuration Management
+
+```yaml
+# .claude-code/terms-of-service.config.yml
+defaults:
+  language: en
+  jurisdiction: us
+  compliance_level: standard
+  output_format: markdown
+
+agent_settings:
+  legal-compliance-reviewer:
+    depth: comprehensive
+    include_citations: true
+    risk_threshold: medium
+
+  privacy-data-specialist:
+    encryption_standard: aes-256
+    retention_default: 7_years
+    gdpr_strict_mode: true
+
+  user-rights-advocate:
+    readability_target: grade_8
+    accessibility_level: wcag_aa
+    plain_language: true
+
+templates:
+  saas: templates/saas-terms.md
+  mobile: templates/mobile-terms.md
+  marketplace: templates/marketplace-terms.md
+  api: templates/api-terms.md
+
+integrations:
+  version_control: git
+  translation_service: deepl
+  legal_database: westlaw
+  monitoring: datadog
+```
+
+---
+
+*Terms of Service System Implementation v1.0 - Full slash command and agent orchestration*
