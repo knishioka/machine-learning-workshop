@@ -1,0 +1,46 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/path/to/allowed/directory"
+      ],
+      "description": "ファイルシステム操作用MCPサーバー"
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "your_github_token_here"
+      },
+      "description": "GitHub連携用MCPサーバー（要トークン設定）"
+    },
+    "example-custom": {
+      "command": "node",
+      "args": [
+        "/path/to/your/custom/mcp-server.js"
+      ],
+      "description": "カスタムMCPサーバーの例"
+    }
+  },
+  "notes": [
+    "この設定ファイルは、Agent SDKでMCPサーバーを使用するためのサンプルです。",
+    "",
+    "使用方法:",
+    "1. 使用したいMCPサーバーをインストール",
+    "2. 上記の設定を実際の環境に合わせて修正",
+    "3. 'filesystem' サーバーの場合: /path/to/allowed/directory を実際のパスに変更",
+    "4. 'github' サーバーの場合: GITHUB_TOKEN を実際のトークンに変更",
+    "",
+    "MCPサーバーのインストール例:",
+    "npm install -g @modelcontextprotocol/server-filesystem",
+    "npm install -g @modelcontextprotocol/server-github",
+    "",
+    "詳細: https://github.com/modelcontextprotocol/servers"
+  ]
+}
