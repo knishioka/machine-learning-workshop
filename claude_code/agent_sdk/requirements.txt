@@ -1,0 +1,13 @@
+# Claude Agent SDK デモプロジェクト - 依存関係
+
+# Agent SDK本体
+claude-agent-sdk>=0.1.0
+
+# 環境変数管理
+python-dotenv>=1.0.0
+
+# 非同期処理サポート
+aiofiles>=23.0.0
+
+# その他ユーティリティ
+rich>=13.0.0  # 美しいコンソール出力
