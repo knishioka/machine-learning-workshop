@@ -29,12 +29,54 @@ import json
 from pathlib import Path
 from dotenv import load_dotenv
 from claude_agent_sdk import query
+from claude_agent_sdk.types import ResultMessage
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
 console = Console()
 load_dotenv()
+
+
+def print_usage_stats(result_message):
+    """トークン使用量と費用を表示"""
+    if not result_message.usage:
+        return
+
+    usage = result_message.usage
+
+    # テーブルを作成
+    table = Table(title="💰 トークン使用量と費用")
+    table.add_column("項目", style="cyan")
+    table.add_column("値", justify="right", style="yellow")
+
+    # トークン数
+    table.add_row("入力トークン", f"{usage.get('input_tokens', 0):,}")
+
+    if usage.get('cache_read_input_tokens'):
+        table.add_row("キャッシュ読取", f"{usage.get('cache_read_input_tokens', 0):,}")
+
+    if usage.get('cache_creation_input_tokens'):
+        table.add_row("キャッシュ作成", f"{usage.get('cache_creation_input_tokens', 0):,}")
+
+    table.add_row("出力トークン", f"{usage.get('output_tokens', 0):,}")
+
+    total_tokens = (
+        usage.get('input_tokens', 0) +
+        usage.get('cache_read_input_tokens', 0) +
+        usage.get('cache_creation_input_tokens', 0) +
+        usage.get('output_tokens', 0)
+    )
+    table.add_row("", "", end_section=True)
+    table.add_row("合計トークン", f"{total_tokens:,}", style="bold")
+
+    # 費用
+    if result_message.total_cost_usd:
+        table.add_row("", "", end_section=True)
+        table.add_row("総コスト (USD)", f"${result_message.total_cost_usd:.6f}", style="bold green")
+
+    console.print()
+    console.print(table)
 
 
 async def demonstrate_mcp():
@@ -100,7 +142,7 @@ async def demonstrate_mcp():
                 # "mcp_servers": mcp_config.get("mcpServers", {}),
             }
         ):
-            if message.type == "result":
+            if isinstance(message, ResultMessage):
                 console.print()
                 console.print(Panel(
                     f"[bold green]{message.result}[/bold green]",
@@ -108,7 +150,10 @@ async def demonstrate_mcp():
                     border_style="green"
                 ))
 
-            elif message.type == "tool_use":
+                # トークン使用量と費用を表示
+                print_usage_stats(message)
+
+            elif hasattr(message, 'type') and message.type == "tool_use":
                 tool_name = getattr(message, 'tool_name', 'unknown')
                 console.print(f"[blue]🔧 ツール使用: {tool_name}[/blue]")
 
