@@ -37,6 +37,8 @@ class DemoRunner:
         self.quick_mode = quick_mode
         self.skip_mcp = skip_mcp
         self.results = []
+        self.total_demos = 0
+        self.completed_demos = 0
 
     def print_header(self):
         """ヘッダー表示"""
@@ -48,6 +50,22 @@ class DemoRunner:
             f"MCP連携: {'スキップ' if self.skip_mcp else '含む'}",
             border_style="cyan"
         ))
+
+    def print_progress(self):
+        """進捗状況を表示"""
+        completed = sum(1 for r in self.results if r["status"] == "完了")
+        skipped = sum(1 for r in self.results if r["status"] == "スキップ")
+        failed = len(self.results) - completed - skipped
+
+        console.print()
+        console.print(f"[bold cyan]📊 進捗: {len(self.results)}/{self.total_demos}[/bold cyan]", end="")
+        if completed > 0:
+            console.print(f"  [green]✅ {completed}[/green]", end="")
+        if skipped > 0:
+            console.print(f"  [yellow]⏭️  {skipped}[/yellow]", end="")
+        if failed > 0:
+            console.print(f"  [red]❌ {failed}[/red]", end="")
+        console.print()
 
     def run_demo(self, level: str, name: str, description: str, module_path: str, args: list = None):
         """
@@ -76,6 +94,7 @@ class DemoRunner:
                 "name": name,
                 "status": "スキップ"
             })
+            self.print_progress()
             return
 
         try:
@@ -131,6 +150,9 @@ class DemoRunner:
                 "name": name,
                 "status": f"エラー: {str(e)}"
             })
+
+        # 進捗表示
+        self.print_progress()
 
         # 次のデモに進む前の確認
         if not self.quick_mode:
@@ -198,6 +220,9 @@ class DemoRunner:
                 "description": "外部サービス連携の拡張性デモ",
                 "module": "examples.04_mcp.mcp_example"
             })
+
+        # 全デモ数を設定
+        self.total_demos = len(demos)
 
         # 各デモを実行
         for demo in demos:
