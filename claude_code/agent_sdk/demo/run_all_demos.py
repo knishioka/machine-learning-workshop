@@ -15,7 +15,7 @@ Agent SDKの能力を段階的に体験できるスクリプトです。
 
 import sys
 import os
-import asyncio
+import subprocess
 from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
@@ -49,7 +49,7 @@ class DemoRunner:
             border_style="cyan"
         ))
 
-    async def run_demo(self, level: str, name: str, description: str, module_path: str):
+    def run_demo(self, level: str, name: str, description: str, module_path: str, args: list = None):
         """
         個別デモを実行
 
@@ -58,7 +58,10 @@ class DemoRunner:
             name: デモ名
             description: 説明
             module_path: モジュールパス
+            args: デモに渡すコマンドライン引数（オプション）
         """
+        if args is None:
+            args = []
         console.print()
         console.print(Panel(
             f"[bold yellow]{level}[/bold yellow]\n"
@@ -76,19 +79,50 @@ class DemoRunner:
             return
 
         try:
-            console.print(f"\n[yellow]▶ {name} を実行中...[/yellow]\n")
+            console.print(f"\n[yellow]▶ {name} を実行中...[/yellow]")
+            console.print(f"[dim]ファイル: {module_path}[/dim]\n")
 
-            # デモモジュールをインポートして実行
-            # 実際の実装では、各デモのmain()を呼び出す
-            # ここではプレースホルダー
-            console.print(f"[dim]（デモ実行: {module_path}）[/dim]")
-            console.print(f"[green]✅ {name} が完了しました[/green]")
+            # デモファイルのパスを構築
+            # module_path を examples.01_basic.hello_agent から examples/01_basic/hello_agent.py に変換
+            demo_file = project_root / (module_path.replace('.', '/') + '.py')
 
-            self.results.append({
-                "level": level,
-                "name": name,
-                "status": "完了"
-            })
+            if not demo_file.exists():
+                raise FileNotFoundError(f"デモファイルが見つかりません: {demo_file}")
+
+            # サブプロセスとしてデモを実行（リアルタイム出力）
+            cmd = [sys.executable, "-u", str(demo_file)] + args
+            process = subprocess.Popen(
+                cmd,
+                cwd=str(project_root),
+                stdin=subprocess.DEVNULL,  # 対話的な入力を無効化
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1  # 行バッファリング
+            )
+
+            # リアルタイムで出力を表示
+            for line in process.stdout:
+                # 各行にインデントを追加して見やすく
+                console.print(f"  {line}", end="", markup=False)
+
+            # プロセスの終了を待つ
+            return_code = process.wait()
+
+            if return_code == 0:
+                console.print(f"\n[green]✅ {name} が完了しました[/green]")
+                self.results.append({
+                    "level": level,
+                    "name": name,
+                    "status": "完了"
+                })
+            else:
+                console.print(f"\n[red]❌ {name} がエラーコード {return_code} で終了しました[/red]")
+                self.results.append({
+                    "level": level,
+                    "name": name,
+                    "status": f"エラーコード: {return_code}"
+                })
 
         except Exception as e:
             console.print(f"[red]❌ エラー: {str(e)}[/red]")
@@ -103,7 +137,7 @@ class DemoRunner:
             console.print()
             Prompt.ask("続けるには Enter を押してください", default="")
 
-    async def run_all_demos(self):
+    def run_all_demos(self):
         """すべてのデモを実行"""
 
         self.print_header()
@@ -144,13 +178,15 @@ class DemoRunner:
                 "level": "応用編 (1/4)",
                 "name": "Research Agent",
                 "description": "Web検索を使ったリサーチエージェント",
-                "module": "examples.03_advanced.research_agent"
+                "module": "examples.03_advanced.research_agent",
+                "args": ["Claude Agent SDK の特徴"]
             },
             {
                 "level": "応用編 (2/4)",
                 "name": "Code Reviewer",
                 "description": "自動コードレビュー",
-                "module": "examples.03_advanced.code_reviewer"
+                "module": "examples.03_advanced.code_reviewer",
+                "args": ["examples/01_basic"]
             },
         ]
 
@@ -165,11 +201,12 @@ class DemoRunner:
 
         # 各デモを実行
         for demo in demos:
-            await self.run_demo(
+            self.run_demo(
                 demo["level"],
                 demo["name"],
                 demo["description"],
-                demo["module"]
+                demo["module"],
+                demo.get("args", [])
             )
 
         # 結果サマリー
@@ -255,8 +292,8 @@ def main():
         console.print("[yellow]デモをキャンセルしました[/yellow]")
         sys.exit(0)
 
-    # 非同期実行
-    asyncio.run(runner.run_all_demos())
+    # デモを実行
+    runner.run_all_demos()
 
 
 if __name__ == "__main__":
