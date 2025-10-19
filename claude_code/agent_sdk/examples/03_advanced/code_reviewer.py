@@ -227,9 +227,14 @@ def main():
 
     # 自動修正の確認
     auto_fix = False
-    if Confirm.ask("\n問題が見つかった場合、自動修正を試みますか？", default=False):
-        auto_fix = True
-        console.print("[yellow]⚠️  自動修正モードが有効です。バックアップを取ることをお勧めします。[/yellow]")
+    try:
+        if Confirm.ask("\n問題が見つかった場合、自動修正を試みますか？", default=False):
+            auto_fix = True
+            console.print("[yellow]⚠️  自動修正モードが有効です。バックアップを取ることをお勧めします。[/yellow]")
+    except EOFError:
+        # 標準入力がクローズされている場合（自動実行時など）はデフォルト値を使用
+        console.print("\n[dim]（標準入力がクローズされています。自動修正はスキップします）[/dim]")
+        auto_fix = False
 
     # レビュー実行
     asyncio.run(code_reviewer(target_path, auto_fix))
