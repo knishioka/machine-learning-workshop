@@ -159,14 +159,49 @@ python examples/03_advanced/research_agent.py "2025年のAI技術トレンド"
 
 ### レベル4: MCP連携編（examples/04_mcp/）
 
-**所要時間: 15-20分**
+**所要時間: 10-15分**
 
-- `mcp_example.py`: 外部サービス連携の実例
+- `mcp_example.py`: Context7 MCPによるリアルタイムドキュメント取得
 
 **学べること:**
-- MCPの基本概念
-- 拡張性の高いエージェント設計
-- カスタムツールの追加方法
+- Context7 MCPの活用方法
+- Agent SDKでのMCPサーバー設定
+- リアルタイムドキュメント取得の実装
+- 外部MCPサーバーとの統合
+
+**実行例:**
+```bash
+python examples/04_mcp/mcp_example.py
+```
+
+**期待される動作:**
+```
+📚 Context7でドキュメントを取得中...
+
+🔧 Context7ツール使用: resolve-library-id
+🔧 Context7ツール使用: get-library-docs
+
+╭─ 📊 取得したドキュメント情報 ─╮
+│                                │
+│ ## Next.js 14                  │
+│ - サーバーコンポーネント       │
+│ - App Router                   │
+│ - データフェッチパターン       │
+│                                │
+│ ## React 18                    │
+│ - useState/useEffect           │
+│ - カスタムフック               │
+│                                │
+╰────────────────────────────────╯
+
+💰 トークン: 76,849 ($0.12)
+```
+
+Context7 MCPサーバーを使用して、Next.js 14とReact 18の最新ドキュメントを
+リアルタイムで取得します。古いAPIや存在しないメソッドの問題を解決します。
+
+**前提条件:**
+- Node.js 18+ (Context7 MCPサーバーの実行に必要)
 
 ## 🎬 デモ実行
 
