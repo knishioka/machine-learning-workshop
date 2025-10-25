@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """
-Claude Agent SDK - MCP連携編: Model Context Protocol Integration
+Claude Agent SDK - Context7 MCP連携編: リアルタイムドキュメント取得
 
-MCP（Model Context Protocol）を使用して、外部サービスと連携する
-拡張可能なエージェントのデモです。
+Context7 MCPサーバーを使用して、最新のライブラリドキュメントを
+リアルタイムで取得し、AIエージェントに統合するデモです。
 
-MCPについて:
-MCPは、AIエージェントが外部ツールやデータソースと標準化された
-方法で連携するためのプロトコルです。これにより、エージェントに
-カスタム機能を簡単に追加できます。
+Context7について:
+Context7は、AIエージェントに最新のバージョン固有のドキュメントと
+コード例を動的に提供するMCPサーバーです。古いドキュメントや存在しない
+APIの問題を解決します。
 
 実行方法:
     python examples/04_mcp/mcp_example.py
 
-    注: このデモを実行するには、MCPサーバーの設定が必要です。
-        詳細は README.md を参照してください。
+    注: このデモを実行するには、Context7 MCPサーバーのインストールが必要です。
+        インストールコマンド: npx -y @smithery/cli install @upstash/context7-mcp --client claude
 
 期待される動作:
-    1. MCPサーバーに接続
-    2. 利用可能なツールを確認
-    3. MCPツールを使用してタスクを実行
-    4. 結果を表示
+    1. Context7 MCPサーバーに接続
+    2. 複数のライブラリのドキュメントをリクエスト
+    3. 最新のドキュメントと使用例を取得
+    4. 結果を整形して表示
 """
 
 import asyncio
@@ -28,7 +28,7 @@ import os
 import json
 from pathlib import Path
 from dotenv import load_dotenv
-from claude_agent_sdk import query
+from claude_agent_sdk import query, ClaudeAgentOptions
 from claude_agent_sdk.types import ResultMessage
 from rich.console import Console
 from rich.panel import Panel
@@ -79,20 +79,20 @@ def print_usage_stats(result_message):
     console.print(table)
 
 
-async def demonstrate_mcp():
+async def demonstrate_context7():
     """
-    MCP連携のデモ
+    Context7 MCP連携のデモ
 
     このデモで学べること:
-    - MCPの基本概念
-    - MCPサーバーとの連携方法
-    - カスタムツールの追加
-    - 拡張可能なエージェント設計
+    - Context7 MCPの基本概念
+    - リアルタイムドキュメント取得
+    - 最新のライブラリドキュメントの活用
+    - バージョン固有のコード例の取得
     """
 
     console.print(Panel.fit(
-        "[bold cyan]Claude Agent SDK - MCP Integration Demo[/bold cyan]\n"
-        "Model Context Protocolを使用した拡張性のデモ",
+        "[bold cyan]Claude Agent SDK - Context7 MCP Demo[/bold cyan]\n"
+        "リアルタイムで最新のライブラリドキュメントを取得",
         border_style="cyan"
     ))
     console.print()
@@ -103,50 +103,61 @@ async def demonstrate_mcp():
         console.print("[yellow]⚠️  MCP設定ファイルが見つかりません[/yellow]")
         console.print(f"   期待されるパス: {config_path}")
         console.print()
-        console.print("[cyan]📘 MCPについて[/cyan]")
-        demonstrate_mcp_concept()
+        console.print("[cyan]📘 Context7について[/cyan]")
+        demonstrate_context7_concept()
         return
 
     # 設定ファイルの読み込み
     with open(config_path, 'r') as f:
         mcp_config = json.load(f)
 
-    console.print("[green]✅ MCP設定ファイルを読み込みました[/green]")
+    console.print("[green]✅ Context7 MCP設定ファイルを読み込みました[/green]")
     console.print()
 
-    # MCPの基本概念を説明
-    demonstrate_mcp_concept()
+    # Context7の基本概念を説明
+    demonstrate_context7_concept()
     console.print()
 
-    # サンプルタスク（MCPサーバーの例として、ファイルシステムサーバーを想定）
+    # Context7を使用したドキュメント取得タスク
     task = """
-    MCPを使用して以下のタスクを実行してください:
+    Context7 MCPサーバーを使用して、以下のライブラリの最新ドキュメントを取得してください:
 
-    1. 利用可能なMCPツールを確認
-    2. これらのツールを使用してサンプルタスクを実行
-    3. 実行結果を報告
+    1. Next.js 14 - App Routerとサーバーコンポーネントについて
+    2. React 18 - Hooksの使い方（特にuseStateとuseEffect）について
 
-    注: 実際のMCPサーバーが設定されていない場合は、
-        どのようなツールが利用可能になるかを説明してください。
+    各ライブラリについて:
+    - resolve-library-idツールを使ってライブラリIDを解決
+    - get-library-docsツールを使って最新のドキュメントを取得
+    - 主要な機能と使用例を簡潔にまとめる（各100文字程度）
+
+    use context7
     """
 
-    console.print("[yellow]🔧 MCPタスクを実行中...[/yellow]")
+    console.print("[yellow]📚 Context7でドキュメントを取得中...[/yellow]")
     console.print()
 
     # エージェント実行
     try:
-        async for message in query(
-            prompt=task,
-            options={
-                # MCP設定を渡す（実際のSDKの仕様に合わせて調整）
-                # "mcp_servers": mcp_config.get("mcpServers", {}),
-            }
-        ):
+        # Context7 MCPサーバーの設定
+        options = ClaudeAgentOptions(
+            mcp_servers={
+                "context7": {
+                    "command": "npx",
+                    "args": ["-y", "@upstash/context7-mcp"]
+                }
+            },
+            permission_mode="bypassPermissions"  # デモのためツールを自動承認
+        )
+
+        # または、設定ファイルのパスを渡す（代替方法）
+        # options = ClaudeAgentOptions(mcp_servers=config_path)
+
+        async for message in query(prompt=task, options=options):
             if isinstance(message, ResultMessage):
                 console.print()
                 console.print(Panel(
                     f"[bold green]{message.result}[/bold green]",
-                    title="📊 実行結果",
+                    title="📊 取得したドキュメント情報",
                     border_style="green"
                 ))
 
@@ -155,129 +166,141 @@ async def demonstrate_mcp():
 
             elif hasattr(message, 'type') and message.type == "tool_use":
                 tool_name = getattr(message, 'tool_name', 'unknown')
-                console.print(f"[blue]🔧 ツール使用: {tool_name}[/blue]")
+                console.print(f"[blue]🔧 Context7ツール使用: {tool_name}[/blue]")
 
-            elif message.type == "thinking":
+            elif hasattr(message, 'type') and message.type == "thinking":
                 content = message.content[:80]
                 if len(message.content) > 80:
                     content += "..."
                 console.print(f"[dim]💭 {content}[/dim]")
 
     except Exception as e:
-        console.print(f"[yellow]⚠️  {str(e)}[/yellow]")
+        console.print(f"[yellow]⚠️  エラー: {str(e)}[/yellow]")
         console.print()
-        console.print("[cyan]💡 これは正常です。MCPサーバーが設定されていない場合、")
-        console.print("   このようなエラーが発生します。[/cyan]")
+        console.print("[cyan]💡 考えられる原因:[/cyan]")
+        console.print("   1. Node.js 18+ がインストールされていない")
+        console.print("   2. npx が利用できない")
+        console.print("   3. Context7 MCPサーバーのインストールエラー")
+        console.print()
+        console.print("[cyan]セットアップ方法:[/cyan]")
+        console.print("   # Node.jsの確認")
+        console.print("   node --version  # 18以上が必要")
+        console.print()
+        console.print("   # Context7のクイックインストール（オプション）")
+        console.print("   npx -y @smithery/cli install @upstash/context7-mcp --client claude")
 
     console.print()
     console.print("[yellow]💡 このデモで学べること:[/yellow]")
-    console.print("  • MCPの基本概念と利点")
-    console.print("  • MCPサーバーの設定方法")
-    console.print("  • カスタムツールの追加")
-    console.print("  • エージェントの拡張性")
+    console.print("  • Context7 MCPの活用方法")
+    console.print("  • リアルタイムドキュメント取得")
+    console.print("  • 最新のコード例の取得")
+    console.print("  • 古いAPIドキュメントの問題解決")
 
 
-def demonstrate_mcp_concept():
+def demonstrate_context7_concept():
     """
-    MCPの概念を視覚的に説明
+    Context7の概念を視覚的に説明
     """
 
     console.print(Panel(
-        """[bold]Model Context Protocol (MCP) とは？[/bold]
+        """[bold]Context7 MCP とは？[/bold]
 
-MCPは、AIエージェントが外部ツールやデータソースと
-標準化された方法で連携するためのプロトコルです。
+Context7は、AIエージェントに最新のバージョン固有のドキュメントと
+コード例を動的に提供するMCPサーバーです。
 
-[cyan]主な利点:[/cyan]
-1. 標準化: 統一されたインターフェース
-2. 拡張性: 簡単にツール追加
-3. 再利用性: MCPサーバーは複数のエージェントで共有
-4. セキュリティ: 権限管理が明確
+[cyan]解決する問題:[/cyan]
+• 古いトレーニングデータによる古いコード生成
+• 存在しないAPIの幻覚
+• バージョン不一致によるエラー
+• ドキュメント検索の手間
 
-[cyan]活用例:[/cyan]
-• データベース接続（PostgreSQL, MongoDB など）
-• 外部API連携（GitHub, Slack, Notion など）
-• カスタムビジネスロジック
-• 社内システム統合
+[cyan]主な機能:[/cyan]
+1. リアルタイムドキュメント取得
+2. バージョン固有のコード例
+3. 最新のAPI仕様
+4. プロンプトへの自動統合
+
+[cyan]使い方:[/cyan]
+プロンプトに "use context7" を追加するだけ！
+例: "Next.js 14でルーティングを実装 use context7"
         """,
-        title="📘 MCPの基礎知識",
+        title="📘 Context7の基礎知識",
         border_style="blue"
     ))
     console.print()
 
-    # MCPサーバーの例を表形式で表示
-    table = Table(title="🔌 よく使われるMCPサーバーの例")
-    table.add_column("サーバー名", style="cyan")
+    # Context7が提供するツールを表形式で表示
+    table = Table(title="🔧 Context7が提供するツール")
+    table.add_column("ツール名", style="cyan")
     table.add_column("用途", style="green")
-    table.add_column("提供ツール例", style="yellow")
+    table.add_column("パラメータ", style="yellow")
 
     table.add_row(
-        "filesystem",
-        "ファイルシステム操作",
-        "read_file, write_file, list_directory"
+        "resolve-library-id",
+        "ライブラリ名を\nContext7 IDに変換",
+        "libraryName (必須)"
     )
     table.add_row(
-        "github",
-        "GitHub連携",
-        "create_pr, list_issues, comment"
-    )
-    table.add_row(
-        "database",
-        "データベース操作",
-        "query, insert, update"
-    )
-    table.add_row(
-        "slack",
-        "Slack連携",
-        "send_message, list_channels"
-    )
-    table.add_row(
-        "custom",
-        "カスタムツール",
-        "あなたのビジネスロジック"
+        "get-library-docs",
+        "ライブラリの\nドキュメントを取得",
+        "libraryId (必須)\ntopic (オプション)\ntokens (オプション)"
     )
 
     console.print(table)
+    console.print()
+
+    # サポートされているライブラリの例
+    libs_table = Table(title="📚 サポートされているライブラリ例")
+    libs_table.add_column("カテゴリ", style="cyan")
+    libs_table.add_column("ライブラリ", style="green")
+
+    libs_table.add_row("JavaScript", "Next.js, React, Vue, Node.js")
+    libs_table.add_row("Python", "FastAPI, Django, Flask, Pandas")
+    libs_table.add_row("その他", "TypeScript, Tailwind CSS, など多数")
+
+    console.print(libs_table)
 
 
-async def show_mcp_setup_guide():
+async def show_context7_setup_guide():
     """
-    MCPセットアップガイドの表示
+    Context7セットアップガイドの表示
     """
 
     console.print()
     console.print(Panel(
-        """[bold cyan]MCP セットアップガイド[/bold cyan]
+        """[bold cyan]Context7 セットアップガイド[/bold cyan]
 
-[bold]ステップ1: MCPサーバーの選択[/bold]
-公式のMCPサーバーリポジトリから選択:
-https://github.com/modelcontextprotocol/servers
-
-[bold]ステップ2: MCPサーバーのインストール[/bold]
+[bold]方法1: クイックインストール（推奨）[/bold]
 ```bash
-# 例: ファイルシステムサーバー
-npm install -g @modelcontextprotocol/server-filesystem
+npx -y @smithery/cli install @upstash/context7-mcp --client claude
 ```
 
-[bold]ステップ3: 設定ファイルの更新[/bold]
-mcp_config.json に追加:
+[bold]方法2: マニュアル設定[/bold]
+Claude Desktop、Cursor、VS Codeなどの設定ファイルを編集:
+
+macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+Windows: %APPDATA%\\Claude\\claude_desktop_config.json
+
 ```json
 {
   "mcpServers": {
-    "filesystem": {
+    "context7": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/dir"]
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }
 ```
 
-[bold]ステップ4: エージェントの実行[/bold]
-```bash
-python examples/04_mcp/mcp_example.py
-```
+[bold]方法3: 他のランタイム[/bold]
+Bun: bunx -y @upstash/context7-mcp
+Deno: deno run --allow-all npm:@upstash/context7-mcp
 
-詳細は README.md を参照してください。
+[bold]使い方[/bold]
+プロンプトに "use context7" を追加:
+"Next.js 14でApp Routerを使用 use context7"
+
+詳細: https://glama.ai/mcp/servers/@upstash/context7-mcp
         """,
         border_style="green"
     ))
@@ -295,12 +318,17 @@ def main():
         exit(1)
 
     # デモ実行
-    asyncio.run(demonstrate_mcp())
+    asyncio.run(demonstrate_context7())
 
     # セットアップガイドの表示
     console.print()
-    if console.input("[cyan]MCPセットアップガイドを表示しますか？ (y/N): [/cyan]").lower() == 'y':
-        asyncio.run(show_mcp_setup_guide())
+    try:
+        response = console.input("[cyan]Context7セットアップガイドを表示しますか？ (y/N): [/cyan]").lower()
+        if response == 'y':
+            asyncio.run(show_context7_setup_guide())
+    except (EOFError, KeyboardInterrupt):
+        # 自動実行時やCtrl+C時はスキップ
+        pass
 
 
 if __name__ == "__main__":

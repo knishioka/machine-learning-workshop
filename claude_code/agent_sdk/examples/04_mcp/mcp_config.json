@@ -1,46 +1,42 @@
 {
   "mcpServers": {
-    "filesystem": {
+    "context7": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/path/to/allowed/directory"
+        "@upstash/context7-mcp"
       ],
-      "description": "ファイルシステム操作用MCPサーバー"
-    },
-    "github": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
-      "env": {
-        "GITHUB_TOKEN": "your_github_token_here"
-      },
-      "description": "GitHub連携用MCPサーバー（要トークン設定）"
-    },
-    "example-custom": {
-      "command": "node",
-      "args": [
-        "/path/to/your/custom/mcp-server.js"
-      ],
-      "description": "カスタムMCPサーバーの例"
+      "description": "Context7 - リアルタイムで最新のライブラリドキュメントを提供"
     }
   },
   "notes": [
-    "この設定ファイルは、Agent SDKでMCPサーバーを使用するためのサンプルです。",
+    "Context7 MCP Server - 最新のライブラリドキュメントとコード例を提供",
     "",
-    "使用方法:",
-    "1. 使用したいMCPサーバーをインストール",
-    "2. 上記の設定を実際の環境に合わせて修正",
-    "3. 'filesystem' サーバーの場合: /path/to/allowed/directory を実際のパスに変更",
-    "4. 'github' サーバーの場合: GITHUB_TOKEN を実際のトークンに変更",
+    "インストール方法:",
+    "  クイックインストール:",
+    "    npx -y @smithery/cli install @upstash/context7-mcp --client claude",
     "",
-    "MCPサーバーのインストール例:",
-    "npm install -g @modelcontextprotocol/server-filesystem",
-    "npm install -g @modelcontextprotocol/server-github",
+    "  手動設定:",
+    "    Claude Desktop設定ファイルに上記の設定を追加",
+    "    macOS: ~/Library/Application Support/Claude/claude_desktop_config.json",
+    "    Windows: %APPDATA%\\Claude\\claude_desktop_config.json",
     "",
-    "詳細: https://github.com/modelcontextprotocol/servers"
+    "使い方:",
+    "  プロンプトに 'use context7' を追加するだけ",
+    "  例: 'Next.js 14でApp Routerを実装 use context7'",
+    "",
+    "提供されるツール:",
+    "  1. resolve-library-id: ライブラリ名をContext7 IDに変換",
+    "  2. get-library-docs: ライブラリのドキュメントを取得",
+    "",
+    "サポートされているライブラリ例:",
+    "  JavaScript/TypeScript: Next.js, React, Vue, Node.js, Express",
+    "  Python: FastAPI, Django, Flask, Pandas, NumPy",
+    "  CSS: Tailwind CSS",
+    "  その他多数のライブラリをサポート",
+    "",
+    "詳細:",
+    "  https://glama.ai/mcp/servers/@upstash/context7-mcp",
+    "  https://github.com/upstash/context7-mcp"
   ]
 }

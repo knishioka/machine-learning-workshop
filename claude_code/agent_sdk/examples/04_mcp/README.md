@@ -1,100 +1,85 @@
-# MCP連携編: 拡張可能なエージェント
+# MCP連携編: Context7によるリアルタイムドキュメント取得
 
-Model Context Protocol (MCP) を使用して、Agent SDK の拡張性を実証するデモです。
+Context7 MCPサーバーを使用して、最新のライブラリドキュメントをリアルタイムで取得し、Agent SDKに統合するデモです。
 
 ## 📚 このセクションで学べること
 
-- MCPの基本概念と利点
-- MCPサーバーの設定方法
-- カスタムツールの追加
-- 外部サービスとの統合
+- Context7 MCPの基本概念と利点
+- Agent SDKでのMCPサーバー設定方法
+- 外部MCPサーバーとの統合
+- リアルタイムドキュメント取得の実装
 - 拡張可能なエージェント設計
 
-## 🎯 Model Context Protocol (MCP) とは？
+## 🎯 Context7 MCP とは？
 
-MCP は、AIエージェントが外部ツールやデータソースと標準化された方法で連携するためのプロトコルです。
+Context7は、AIエージェントに**最新のバージョン固有のドキュメント**とコード例を動的に提供するMCPサーバーです。
 
-### 主な利点
+### 解決する問題
 
-1. **標準化**: 統一されたインターフェースで様々なサービスと連携
-2. **拡張性**: 簡単に新しいツールを追加可能
-3. **再利用性**: MCPサーバーは複数のエージェントで共有
-4. **セキュリティ**: 明確な権限管理とアクセス制御
+従来のLLMは訓練データが古く、以下の問題がありました：
 
-### アーキテクチャ
+- 🚫 古いトレーニングデータによる古いコード生成
+- 🚫 存在しないAPIの幻覚
+- 🚫 バージョン不一致によるエラー
+- 🚫 ドキュメント検索の手間
 
-```
-┌─────────────────┐
-│  Agent SDK      │
-│  (エージェント) │
-└────────┬────────┘
-         │
-         v
-┌─────────────────┐
-│  MCP Protocol   │
-│  (標準IF)       │
-└────────┬────────┘
-         │
-         v
-┌─────────────────────────────────┐
-│  MCP Servers                    │
-├─────────────────────────────────┤
-│  • Filesystem Server            │
-│  • GitHub Server                │
-│  • Database Server              │
-│  • Custom Business Logic        │
-│  • ...                          │
-└─────────────────────────────────┘
-```
+Context7はこれらを解決し、**常に最新のドキュメント**を提供します。
+
+### 主な機能
+
+1. **リアルタイムドキュメント取得**: 最新の公式ドキュメントを動的に取得
+2. **バージョン固有のコード例**: 指定バージョンの正確なコード例
+3. **最新のAPI仕様**: 最新のAPIリファレンス
+4. **プロンプトへの自動統合**: "use context7" で簡単に利用
+
+### 提供されるツール
+
+| ツール名 | 用途 | パラメータ |
+|---------|------|-----------|
+| **resolve-library-id** | ライブラリ名をContext7 IDに変換 | `libraryName` (必須) |
+| **get-library-docs** | ライブラリのドキュメントを取得 | `libraryId` (必須)<br>`topic` (オプション)<br>`tokens` (オプション) |
+
+### サポートされているライブラリ例
+
+- **JavaScript/TypeScript**: Next.js, React, Vue, Node.js, Express, TypeScript
+- **Python**: FastAPI, Django, Flask, Pandas, NumPy
+- **CSS**: Tailwind CSS
+- その他多数のライブラリ
 
 ## 🚀 セットアップ
 
 ### 前提条件
 
-- Node.js 18+ (MCPサーバーの多くはNode.jsで実装)
-- npm または npx
-
-### ステップ1: MCPサーバーのインストール
-
-公式のMCPサーバーから選択してインストール:
+- **Python 3.8+**
+- **Node.js 18+** (Context7 MCPサーバーの実行に必要)
+- **npm または npx**
 
 ```bash
-# ファイルシステムサーバー
-npm install -g @modelcontextprotocol/server-filesystem
-
-# GitHubサーバー
-npm install -g @modelcontextprotocol/server-github
-
-# Slackサーバー
-npm install -g @modelcontextprotocol/server-slack
+# Node.jsのバージョン確認
+node --version  # 18以上が必要
+npx --version
 ```
 
-**公式サーバー一覧:**
-https://github.com/modelcontextprotocol/servers
+### ステップ1: Python環境の準備
 
-### ステップ2: 設定ファイルの編集
+```bash
+# 依存関係がインストール済みであることを確認
+pip install claude-agent-sdk rich python-dotenv
 
-`mcp_config.json` を編集して、使用するMCPサーバーを設定:
-
-```json
-{
-  "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/Users/your-name/allowed-directory"
-      ]
-    }
-  }
-}
+# APIキーの設定
+# .env ファイルに ANTHROPIC_API_KEY を設定
 ```
 
-**重要:**
-- `filesystem` サーバーの場合: アクセスを許可するディレクトリパスを指定
-- `github` サーバーの場合: `GITHUB_TOKEN` 環境変数を設定
-- `database` サーバーの場合: 接続文字列を設定
+### ステップ2: Context7の確認
+
+Context7は`npx`で自動的にダウンロード・実行されるため、事前のインストールは不要です。
+
+ただし、Claude Desktopなどで恒久的に使用したい場合は、以下のコマンドでインストールできます：
+
+```bash
+# オプション: Claude Desktopへのインストール
+npx -y @smithery/cli install @upstash/context7-mcp --client claude
+```
 
 ### ステップ3: デモの実行
 
@@ -102,306 +87,403 @@ https://github.com/modelcontextprotocol/servers
 python examples/04_mcp/mcp_example.py
 ```
 
-## 📋 利用可能なMCPサーバー
+## 📋 デモの動作
 
-### 公式MCPサーバー
+### 実行フロー
 
-| サーバー名 | 用途 | 提供ツール例 |
-|-----------|------|-------------|
-| **filesystem** | ファイルシステム操作 | read_file, write_file, list_directory, search |
-| **github** | GitHub連携 | create_pr, list_issues, create_issue, comment |
-| **gitlab** | GitLab連携 | 同上（GitLab版） |
-| **slack** | Slack連携 | send_message, list_channels, get_thread |
-| **postgres** | PostgreSQL | query, insert, update, delete |
-| **sqlite** | SQLite | 同上（SQLite版） |
-| **puppeteer** | ブラウザ自動化 | navigate, screenshot, click, scrape |
-| **google-drive** | Google Drive | list_files, read_file, upload |
+1. **初期化**
+   - Context7 MCPサーバーへの接続
+   - 利用可能なツールの確認
 
-### コミュニティMCPサーバー
+2. **ライブラリID解決**
+   - `resolve-library-id` ツールを使用
+   - "Next.js" → `/vercel/next.js/v14.3.0-canary.87`
+   - "React" → `/reactjs/react.dev`
 
-- **Notion**: ページ作成、検索、更新
-- **Jira**: チケット管理
-- **AWS**: S3, Lambda などのAWSリソース操作
-- **カスタムサーバー**: 独自のビジネスロジック
+3. **ドキュメント取得**
+   - `get-library-docs` ツールを使用
+   - 最新のドキュメントとコード例を取得
 
-## 🎬 デモ実行
+4. **結果の表示**
+   - 主要機能の説明
+   - 実用的なコード例
+   - トークン使用量と費用
 
-### 基本デモ
-
-```bash
-python examples/04_mcp/mcp_example.py
-```
-
-**期待される動作:**
+### 期待される出力
 
 ```
-┌─ Claude Agent SDK - MCP Integration Demo ─┐
-│ Model Context Protocolを使用した拡張性のデモ│
-└───────────────────────────────────────────┘
+╭─ Context7 MCP Demo ─╮
+│ リアルタイムで最新の │
+│ ドキュメントを取得   │
+╰─────────────────────╯
 
-✅ MCP設定ファイルを読み込みました
+📚 Context7でドキュメントを取得中...
 
-┌─ 📘 MCPの基礎知識 ─┐
-│                    │
-│ Model Context Protocol (MCP) とは？│
-│ ...                │
-└────────────────────┘
+╭─ 📊 取得したドキュメント情報 ─╮
+│                                │
+│ ## Next.js 14                  │
+│ - サーバーコンポーネント       │
+│ - App Router                   │
+│ - データフェッチパターン       │
+│                                │
+│ ## React 18                    │
+│ - useState/useEffect           │
+│ - カスタムフック               │
+│ - クリーンアップ関数           │
+│                                │
+╰────────────────────────────────╯
 
-🔧 MCPタスクを実行中...
-
-🔧 ツール使用: filesystem_read_file
-💭 ファイルを読み取っています...
-🔧 ツール使用: filesystem_write_file
-💭 結果を保存しています...
-
-┌─ 📊 実行結果 ─┐
-│ ...            │
-└────────────────┘
+💰 トークン使用量と費用
+合計: 76,849トークン
+費用: $0.12
 ```
 
-## 💡 「すごさ」のポイント
+## 💡 実装の詳細
 
-### 1. 無限の拡張性
+### Agent SDKでのMCP設定
 
-基本のAgent SDKに、任意のツールを追加可能:
+```python
+from claude_agent_sdk import query, ClaudeAgentOptions
 
+# Context7 MCPサーバーの設定
+options = ClaudeAgentOptions(
+    mcp_servers={
+        "context7": {
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp"]
+        }
+    },
+    permission_mode="bypassPermissions"  # デモのためツールを自動承認
+)
+
+# エージェント実行
+async for message in query(prompt=task, options=options):
+    # メッセージ処理
+    ...
 ```
-Agent SDK (基本)
-  ↓
-+ Filesystem MCP → ファイル操作
-+ GitHub MCP     → コード管理
-+ Slack MCP      → チーム連携
-+ Database MCP   → データ管理
-+ Custom MCP     → 独自ロジック
-  ↓
-= 超強力なエージェント
-```
 
-### 2. 標準化の威力
+### MCP設定の2つの方法
 
-MCPを使えば:
-- **同じインターフェース**: どんなサービスも同じ方法で使える
-- **簡単な切り替え**: PostgreSQL → MySQL も設定変更だけ
-- **コード再利用**: 一度書けば、他のプロジェクトでも使える
+#### 方法1: 辞書で直接設定（デモで使用）
 
-### 3. セキュリティと制御
-
-- **明確な権限**: どのツールを使えるか制御
-- **アクセス制限**: ファイルシステムのアクセス範囲を制限
-- **監査可能**: すべてのツール使用を追跡可能
-
-### 4. エコシステム
-
-- **公式サーバー**: すぐに使える高品質なサーバー
-- **コミュニティ**: 常に新しいサーバーが追加
-- **カスタム**: 独自のサーバーも簡単に作成
-
-## 🛠 カスタムMCPサーバーの作成
-
-独自のビジネスロジックをMCPサーバーとして実装できます。
-
-### 最小限のMCPサーバー例
-
-```javascript
-// custom-mcp-server.js
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-
-const server = new Server({
-  name: "custom-business-logic",
-  version: "1.0.0"
-});
-
-// カスタムツールの定義
-server.setRequestHandler("tools/list", async () => ({
-  tools: [{
-    name: "calculate_discount",
-    description: "顧客の割引率を計算",
-    inputSchema: {
-      type: "object",
-      properties: {
-        customerId: { type: "string" },
-        orderAmount: { type: "number" }
-      }
+```python
+options = ClaudeAgentOptions(
+    mcp_servers={
+        "context7": {
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp"]
+        }
     }
-  }]
-}));
-
-// ツールの実行
-server.setRequestHandler("tools/call", async (request) => {
-  if (request.params.name === "calculate_discount") {
-    // ビジネスロジックを実装
-    const discount = calculateBusinessDiscount(
-      request.params.arguments.customerId,
-      request.params.arguments.orderAmount
-    );
-    return { content: [{ type: "text", text: `Discount: ${discount}%` }] };
-  }
-});
-
-// サーバー起動
-const transport = new StdioServerTransport();
-await server.connect(transport);
+)
 ```
 
-### MCPサーバーを登録
+#### 方法2: 設定ファイルのパスを指定
 
+```python
+from pathlib import Path
+
+config_path = Path(__file__).parent / "mcp_config.json"
+options = ClaudeAgentOptions(mcp_servers=config_path)
+```
+
+`mcp_config.json`:
 ```json
 {
   "mcpServers": {
-    "business-logic": {
-      "command": "node",
-      "args": ["custom-mcp-server.js"]
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }
 ```
 
+### ツール許可モード
+
+Agent SDKには4つの許可モードがあります：
+
+| モード | 説明 | 使用場面 |
+|--------|------|---------|
+| `default` | 各ツール使用時に確認 | 本番環境（推奨） |
+| `acceptEdits` | 編集系ツールを自動承認 | 開発環境 |
+| `plan` | プラン作成後に一括確認 | レビュー重視 |
+| `bypassPermissions` | すべて自動承認 | **デモ・テスト専用** |
+
+**デモでは `bypassPermissions` を使用していますが、本番環境では `default` を推奨します。**
+
 ## 🎨 活用例
 
-### 例1: GitHub連携の自動化
+### 例1: 最新フレームワークの学習
 
 ```python
 task = """
-以下のタスクを実行:
-1. GitHubで未解決のIssueを一覧取得
-2. 各Issueの内容を分析
-3. 優先度を評価
-4. 対応方針をコメントとして投稿
+Next.js 15 の新機能について、Context7を使って最新ドキュメントを取得し、
+以下の点をまとめてください:
+1. Server Actionsの新しい使い方
+2. Partial Prerenderingの仕組み
+3. 実用的なコード例
+
+use context7
 """
 ```
 
-### 例2: データベース分析
+### 例2: マイグレーションガイドの生成
 
 ```python
 task = """
-PostgreSQLデータベースを分析:
-1. 全テーブルのスキーマを取得
-2. 各テーブルのレコード数をカウント
-3. パフォーマンス問題がありそうなクエリを特定
-4. 改善提案のレポートを生成
+React 17から18へのマイグレーションガイドを作成してください。
+Context7で両バージョンのドキュメントを取得し、
+主要な変更点と移行手順を説明してください。
+
+use context7
 """
 ```
 
-### 例3: マルチサービス統合
+### 例3: ライブラリ比較
 
 ```python
 task = """
-以下のワークフローを実行:
-1. Slackで今日のタスクを確認
-2. GitHubで対応するPRをチェック
-3. 進捗状況をNotionに記録
-4. 完了報告をSlackに投稿
+FastAPIとFlaskの最新バージョンを比較してください。
+Context7でドキュメントを取得し、以下を比較:
+1. ルーティング定義
+2. 非同期処理のサポート
+3. バリデーション機能
+4. パフォーマンス
+
+use context7
 """
 ```
 
-## 🔒 セキュリティベストプラクティス
+## 🔧 カスタマイズ
 
-### 1. 最小権限の原則
+### トピックの絞り込み
 
-```json
-{
-  "filesystem": {
-    "args": [
-      "/path/to/specific/allowed/dir"  // 特定のディレクトリのみ
-    ]
-  }
-}
-```
-
-### 2. 機密情報の管理
-
-```bash
-# 環境変数で管理
-export GITHUB_TOKEN="your_token"
-export DATABASE_URL="postgresql://..."
-
-# .env ファイルに記載（gitignore推奨）
-```
-
-### 3. ツールの明示的な許可
+`get-library-docs` ツールの `topic` パラメータで、取得するドキュメントを絞り込めます：
 
 ```python
-options={
-    "allowedTools": [
-        "filesystem_read",  # 読み取りのみ
-        # "filesystem_write" は許可しない
-    ]
-}
+task = """
+React 18のHooksについて、Context7で以下のトピックに絞ってドキュメントを取得:
+- useState
+- useEffect
+- useContext
+
+topic: "hooks"を指定してください。
+use context7
+"""
 ```
 
-## 📖 参考資料
+### トークン数の制御
 
-### 公式ドキュメント
+`tokens` パラメータで、取得するドキュメントの長さを制御できます：
 
-- [MCP 公式サイト](https://modelcontextprotocol.io/)
-- [MCP サーバーリポジトリ](https://github.com/modelcontextprotocol/servers)
-- [Agent SDK + MCP ガイド](https://docs.claude.com/en/api/agent-sdk/mcp)
+```python
+task = """
+Next.js 14のApp Routerについて、簡潔な説明を取得してください。
+tokens: 5000を指定してください（デフォルトは10000）。
+use context7
+"""
+```
 
-### コミュニティ
+## 🔒 セキュリティとベストプラクティス
 
-- [MCP Discord](https://discord.gg/modelcontextprotocol)
-- [サンプルコード集](https://github.com/modelcontextprotocol/examples)
+### 1. 許可モードの選択
+
+```python
+# ❌ 本番環境で非推奨
+options = ClaudeAgentOptions(
+    mcp_servers={...},
+    permission_mode="bypassPermissions"  # すべて自動承認
+)
+
+# ✅ 本番環境で推奨
+options = ClaudeAgentOptions(
+    mcp_servers={...},
+    permission_mode="default"  # 各ツールで確認
+)
+```
+
+### 2. エラーハンドリング
+
+```python
+try:
+    async for message in query(prompt=task, options=options):
+        # メッセージ処理
+        ...
+except Exception as e:
+    console.print(f"[red]エラー: {str(e)}[/red]")
+    # 適切なフォールバック処理
+```
+
+### 3. タイムアウト設定
+
+```python
+options = ClaudeAgentOptions(
+    mcp_servers={...},
+    max_turns=10  # 最大ターン数を制限
+)
+```
+
+## 📖 他のMCPサーバー
+
+Context7以外にも、様々なMCPサーバーがあります：
+
+### 公式MCPサーバー
+
+| サーバー名 | 用途 | インストール |
+|-----------|------|-------------|
+| **filesystem** | ファイルシステム操作 | `@modelcontextprotocol/server-filesystem` |
+| **github** | GitHub連携 | `@modelcontextprotocol/server-github` |
+| **postgres** | PostgreSQL | `@modelcontextprotocol/server-postgres` |
+| **puppeteer** | ブラウザ自動化 | `@modelcontextprotocol/server-puppeteer` |
+
+**公式サーバー一覧**: https://github.com/modelcontextprotocol/servers
+
+### 複数MCPサーバーの使用
+
+```python
+options = ClaudeAgentOptions(
+    mcp_servers={
+        "context7": {
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp"]
+        },
+        "filesystem": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/dir"]
+        }
+    }
+)
+```
 
 ## ❓ トラブルシューティング
 
-### MCPサーバーが起動しない
+### Node.jsが見つからない
 
 ```
-Error: Cannot find module '@modelcontextprotocol/server-filesystem'
+Error: command not found: npx
 ```
 
 **解決方法:**
 ```bash
-npm install -g @modelcontextprotocol/server-filesystem
-# または
-npx -y @modelcontextprotocol/server-filesystem
+# Node.jsのインストール確認
+node --version
+
+# インストールされていない場合
+# macOS (Homebrew):
+brew install node
+
+# Windows (Chocolatey):
+choco install nodejs
+
+# Linux (apt):
+sudo apt install nodejs npm
+```
+
+### Context7サーバーの起動エラー
+
+```
+Error: Failed to start MCP server 'context7'
+```
+
+**解決方法:**
+```bash
+# npxが利用可能か確認
+npx --version
+
+# 手動でContext7を試す
+npx -y @upstash/context7-mcp
+
+# ネットワーク接続を確認
 ```
 
 ### 権限エラー
 
 ```
-PermissionError: Access denied
+Tool use requires permission
 ```
 
 **解決方法:**
-- 設定ファイルのパスを確認
-- 環境変数（トークンなど）を確認
-- MCPサーバーのログを確認
-
-### 接続エラー
-
-```
-Failed to connect to MCP server
+```python
+# permission_modeを設定
+options = ClaudeAgentOptions(
+    mcp_servers={...},
+    permission_mode="bypassPermissions"  # デモ用
+)
 ```
 
-**解決方法:**
-- MCPサーバーのコマンドが正しいか確認
-- Node.jsがインストールされているか確認
-- ファイアウォール設定を確認
+### トークン使用量が多い
 
----
+Context7は大量のドキュメントを取得するため、トークン使用量が多くなります。
+
+**対策:**
+1. `tokens` パラメータで制限
+2. トピックを絞り込む
+3. キャッシュ読取を活用（2回目以降は安価）
+
+```python
+task = """
+Next.jsのApp Routerについて、簡潔に説明してください。
+tokens: 5000
+topic: "app-router"
+use context7
+"""
+```
 
 ## 🚀 次のステップ
 
-MCP連携編を理解したら:
+Context7 MCP連携を理解したら：
 
-1. **デモスクリプトを実行**: 全体の流れを確認
+1. **他のライブラリで試す**
    ```bash
-   cd ../../demo
-   python run_all_demos.py
+   # プロンプトを変更して実行
+   python examples/04_mcp/mcp_example.py
    ```
 
-2. **プレゼン資料を確認**: Agent SDKの全体像を把握
+2. **他のMCPサーバーを追加**
+   - Filesystemサーバーでファイル操作
+   - GitHubサーバーでコード管理
+   - 複数サーバーの組み合わせ
+
+3. **独自のエージェントを作成**
+   - Context7を統合した学習ツール
+   - ドキュメント生成自動化
+   - コードレビューアシスタント
+
+4. **プレゼン資料を確認**
    ```bash
    cat ../../docs/PRESENTATION.md
    ```
 
-3. **独自のエージェントを作成**: 学んだ知識を活用
+## 📚 参考資料
+
+### Context7関連
+
+- [Context7 公式ページ](https://glama.ai/mcp/servers/@upstash/context7-mcp)
+- [Context7 GitHubリポジトリ](https://github.com/upstash/context7-mcp)
+- [Context7 LobeHub](https://lobehub.com/mcp/upstash-context7)
+
+### MCP関連
+
+- [MCP 公式サイト](https://modelcontextprotocol.io/)
+- [MCP サーバーリポジトリ](https://github.com/modelcontextprotocol/servers)
+- [Agent SDK + MCP ガイド](https://docs.anthropic.com/en/api/agent-sdk/mcp)
+
+### Agent SDK関連
+
+- [Agent SDK ドキュメント](https://docs.claude.com/en/api/agent-sdk/overview)
+- [Python SDK リポジトリ](https://github.com/anthropics/claude-agent-sdk-python)
 
 ---
 
-**まとめ:**
-MCP連携により、Agent SDKは無限の可能性を持つプラットフォームになります。基本的なファイル操作から、GitHub、Slack、データベース、そして独自のビジネスロジックまで、あらゆるものをエージェントに統合できます。
+## 🎓 まとめ
+
+このデモでは、Context7 MCPサーバーを使用して：
+
+✅ **リアルタイムドキュメント取得**: 最新のNext.js 14とReact 18のドキュメントを取得
+✅ **Agent SDKとの統合**: MCPサーバー設定と使用方法を学習
+✅ **実用的な実装**: 実際に動作するコード例を提供
+✅ **拡張可能な設計**: 他のMCPサーバーも追加可能な設計
+
+Context7により、エージェントは常に最新のドキュメントを参照し、古いAPIや存在しない機能を提案することがなくなります。
 
 メインREADME: [../../README.md](../../README.md)
