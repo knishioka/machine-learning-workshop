@@ -61,6 +61,8 @@ uv pip install 'bitsandbytes>=0.43.0'
 2. **model-evaluation-report**: モデル評価レポートの生成
 3. **data-analysis-starter**: データ分析の開始テンプレート
 4. **deployment-checklist**: モデルデプロイメントのチェックリストとコード生成
+5. **ml-weekly-report**: 週次性能レポートの自動生成（定期レポート作成）
+6. **stakeholder-presentation**: ステークホルダー向けプレゼンテーション自動生成（PowerPoint形式）
 
 ### 使い方
 
@@ -82,6 +84,12 @@ Claude Codeを使用している場合、これらのスキルは自動的に利
 
 # deployment-checklistスキルが自動起動
 「このモデルを本番環境にデプロイしたい」
+
+# ml-weekly-reportスキルが自動起動
+「先週のモデル性能レポートを作成して」
+
+# stakeholder-presentationスキルが自動起動
+「経営会議用にプロジェクト進捗のプレゼンを作成して」
 ```
 
 ## 過去の勉強会のスクリプト
