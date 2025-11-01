@@ -51,6 +51,39 @@ uv pip install 'autogluon>=1.1.1'
 uv pip install 'bitsandbytes>=0.43.0'
 ```
 
+## Claude Skills
+
+このプロジェクトには、機械学習ワークフローを効率化するためのClaude Codeスキルが含まれています。
+
+### 利用可能なスキル
+
+1. **ml-experiment-setup**: 機械学習実験のセットアップ支援
+2. **model-evaluation-report**: モデル評価レポートの生成
+3. **data-analysis-starter**: データ分析の開始テンプレート
+4. **deployment-checklist**: モデルデプロイメントのチェックリストとコード生成
+
+### 使い方
+
+Claude Codeを使用している場合、これらのスキルは自動的に利用可能になります。タスクに応じてClaudeが適切なスキルを自動選択します。
+
+詳細な使用方法とカスタマイズについては、[.claude/skills/README.md](.claude/skills/README.md)を参照してください。
+
+### 例
+
+```
+# ml-experiment-setupスキルが自動起動
+「PyTorchで画像分類の実験を始めたい」
+
+# model-evaluation-reportスキルが自動起動
+「訓練したモデルの性能評価レポートを作成して」
+
+# data-analysis-starterスキルが自動起動
+「新しいCSVファイルのデータ分析を始めたい」
+
+# deployment-checklistスキルが自動起動
+「このモデルを本番環境にデプロイしたい」
+```
+
 ## 過去の勉強会のスクリプト
 - [LangGraphを用いたAIアプリケーションにおけるメモリ永続化の実践 (機械学習の社会実装勉強会第38回)](https://speakerdeck.com/knishioka/langgraphwoyong-itaaiapurikesiyonniokerumemoriyong-sok-hua-noshi-jian)
     - [langchain/langchain_persistence.ipynb](langchain/langchain_persistence.ipynb)
