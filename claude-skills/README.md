@@ -55,6 +55,26 @@ daily-report-generator/
 - 週次サマリー形式
 - Slack投稿用形式
 
+**実装詳細**:
+
+このSkillはスクリプトを持たず、SKILL.md内の指示のみで動作します。
+
+```yaml
+# SKILL.md frontmatter
+name: daily-report-generator
+description: |
+  GitコミットログとCalendar情報から日報・週報を自動生成するSkill。
+  「日報を作って」「週報を書いて」などのリクエストで自動発火する。
+# allowed-tools: 指定なし（全ツール使用可能）
+```
+
+**処理フロー**:
+1. `git log --since="midnight"` でコミット取得
+2. コミットメッセージのプレフィックス（feat, fix, doc等）で分類
+3. テンプレートに従ってフォーマット出力
+
+**ポイント**: `allowed-tools`を指定しないことで、Claudeが必要に応じてBash（git）、Read、Write等を自由に使用できます。
+
 ---
 
 ### 2. markdown-to-slides（中級）
@@ -95,6 +115,59 @@ python scripts/md2slides.py input.md output.pptx --theme corporate --aspect 16:9
 ```bash
 pip install python-pptx
 ```
+
+**実装詳細**:
+
+3つのPythonモジュールで構成される本格的な実装です。
+
+```yaml
+# SKILL.md frontmatter
+name: markdown-to-slides
+description: |
+  MarkdownファイルをPowerPointプレゼンテーション（PPTX）に変換するSkill。
+  「Markdownをスライドに変換して」などのリクエストで自動発火する。
+allowed-tools: Bash, Read, Write, Glob  # ツールを制限
+```
+
+**モジュール構成**:
+
+| ファイル | 役割 | 主要クラス/関数 |
+|---------|------|----------------|
+| `parser.py` | Markdown解析 | `MarkdownParser`, `SlideContent`, `PresentationData` |
+| `generator.py` | PPTX生成 | `PresentationGenerator`, テーマ定義 |
+| `md2slides.py` | CLIエントリ | `main()`, argparse処理 |
+
+**parser.py の実装**:
+```python
+@dataclass
+class SlideContent:
+    title: str = ""
+    bullets: list[str] = field(default_factory=list)
+    code_blocks: list[str] = field(default_factory=list)
+    is_title_slide: bool = False
+
+class MarkdownParser:
+    def parse(self, content: str) -> PresentationData:
+        # H1 → タイトルスライド
+        # H2 → コンテンツスライド
+        # - リスト → 箇条書き
+        # ``` → コードブロック
+```
+
+**generator.py の実装**:
+```python
+THEMES = {
+    "default": {"title_color": RGBColor(0x00, 0x00, 0x00), ...},
+    "dark": {"title_color": RGBColor(0xFF, 0xFF, 0xFF), ...},
+    "corporate": {"title_color": RGBColor(0x1A, 0x1A, 0x2E), ...},
+}
+
+class PresentationGenerator:
+    def create_presentation(self, data: PresentationData, output_path: Path):
+        # python-pptxでスライド生成
+```
+
+**ポイント**: `allowed-tools: Bash, Read, Write, Glob` でツールを制限し、不要な操作を防止しています。
 
 ---
 
@@ -145,6 +218,68 @@ python scripts/send_webhook.py --message "Hello from Claude!"
 # テンプレート使用
 python scripts/send_webhook.py --message "ビルド失敗" --template error --title "CIアラート"
 ```
+
+**実装詳細**:
+
+MCP統合とWebhookフォールバックの2モード対応により、柔軟な外部連携を実現しています。
+
+```yaml
+# SKILL.md frontmatter
+name: slack-notifier
+description: |
+  Slackチャンネルにフォーマット済みメッセージを送信するSkill。
+  「Slackに通知して」「#channelに投稿して」などのリクエストで自動発火する。
+# allowed-tools: 指定なし（MCP含む全ツール使用可能）
+```
+
+**デュアルモード設計**:
+
+```
+┌─────────────────────────────────────────────────┐
+│              slack-notifier Skill               │
+├─────────────────────────────────────────────────┤
+│  1. MCP利用可能？                               │
+│     └─ Yes → mcp__slack__slack_post_message     │
+│     └─ No  → 2へ                                │
+│                                                 │
+│  2. SLACK_WEBHOOK_URL設定済み？                 │
+│     └─ Yes → send_webhook.py で HTTP POST       │
+│     └─ No  → エラー: セットアップ必要           │
+└─────────────────────────────────────────────────┘
+```
+
+**send_webhook.py の実装**:
+
+```python
+# テンプレート定義
+TEMPLATES = {
+    "success": {"blocks": [{"type": "section", "text": {"type": "mrkdwn",
+                "text": ":white_check_mark: *{title}*\n{message}"}}]},
+    "error":   {"blocks": [{"type": "section", "text": {"type": "mrkdwn",
+                "text": ":rotating_light: *{title}*\n{message}"}}]},
+    # warning, info も同様
+}
+
+def validate_webhook_url(url: str) -> bool:
+    """Slack Webhook URLフォーマットを検証（セキュリティ対策）"""
+    pattern = r'^https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[a-zA-Z0-9]+$'
+    return bool(re.match(pattern, url))
+
+def send_message(webhook_url, message, template=None, title=None):
+    """urllib.requestでHTTP POST送信"""
+```
+
+**resources/ の活用**:
+
+| ファイル | 内容 |
+|---------|------|
+| `setup-guide.md` | MCP/Webhook両モードのセットアップ手順 |
+| `message-templates.md` | Slack Block Kit形式のテンプレート集 |
+
+**ポイント**:
+- `allowed-tools`を指定せず、MCPツール（`mcp__slack__*`）も使用可能に
+- Webhook URLの正規表現バリデーションでセキュリティ確保
+- テンプレートシステムで統一されたメッセージフォーマット
 
 ---
 
